@@ -32050,7 +32050,7 @@ async function run() {
     const urlOutput = await (0, exec_1.getExecOutput)('/bin/bash', ['-c', `git -C ${submodulePath} config --get remote.origin.url`]);
     const submoduleUrl = urlOutput.stdout.trim().replace('.git', '');
     const octokit = (0, github_1.getOctokit)(githubToken);
-    await (0, exec_1.exec)('/bin/bash', ['-c', `git -C ${submodulePath} fetch origin main`]);
+    await (0, exec_1.exec)('/bin/bash', ['-c', `git -C ${submodulePath} fetch --all`]);
     const currentBranchOutput = await (0, exec_1.getExecOutput)('/bin/bash', [
         '-c',
         `git -C ${submodulePath} name-rev --name-only HEAD`,

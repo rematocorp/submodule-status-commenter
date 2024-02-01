@@ -8,7 +8,7 @@ This action informs PR reviewers about the status of submodules the PR is using:
 name: Submodule status commenter
 on:
     pull_request:
-        types: [opened, edited, closed, reopened, ready_for_review, converted_to_draft]
+        types: [opened, synchronize, reopened]
 jobs:
     run:
         runs-on: ubuntu-latest
