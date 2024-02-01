@@ -5,8 +5,8 @@ This action informs PR reviewers about the submodule status the PR is using:
 > **Submodule "Foo" status**
 >
 > -   Current branch: **feature/bar**
-> -   Commits behind main: **2**
-> -   Commits ahead main: **10**
+> -   Behind main: **2**
+> -   Ahead main: **10**
 >
 > [View exact state]() — [View open PR]()
 

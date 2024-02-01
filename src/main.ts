@@ -5,6 +5,7 @@ import {
 	updatePullRequestComment,
 } from './githubRequests'
 import { exec } from './bash'
+import moment from 'moment'
 
 export async function run(path: string) {
 	await exec(`git -C ${path} fetch --depth=50 origin +refs/heads/*:refs/remotes/origin/*`)
@@ -15,18 +16,32 @@ export async function run(path: string) {
 	const ahead = await exec(`git -C ${path} rev-list --count origin/main..HEAD`)
 	const submoduleName = await exec(`basename $(git -C ${path} rev-parse --show-toplevel)`)
 	const submoduleUrl = (await exec(`git -C ${path} config --get remote.origin.url`)).replace('.git', '')
+	const age = await getAge(path, commitHash)
 	const prUrl = await getSubmodulePullRequestByBranchName(branch, submoduleUrl)
 
 	await comment(
 		`**Submodule "${submoduleName}" status**
 
 - Current branch: **${branch}**
-- Commits behind main: **${behind}**
-- Commits ahead main: **${ahead}**
+- Behind main: **${behind}**
+- Ahead main: **${ahead}**
+- Age: **${age}**
 
 [View exact state](${submoduleUrl}/tree/${commitHash}) ${prUrl ? ' — [View open PR](' + prUrl + ')' : ''}`,
 		submoduleName,
 	)
+}
+
+async function getAge(path: string, commitHash: string) {
+	const currentCommitDate = await exec(`git -C ${path} show -s --format=%ci ${commitHash}`)
+	const latestMainCommitDate = await exec(`git -C ${path} show -s --format=%ci origin/main`)
+
+	const currentCommitMoment = moment(new Date(currentCommitDate.trim()))
+	const latestMainCommitMoment = moment(new Date(latestMainCommitDate.trim()))
+
+	const timeDiff = moment.duration(currentCommitMoment.diff(latestMainCommitMoment))
+
+	return timeDiff.humanize(true)
 }
 
 async function getSubmodulePullRequestByBranchName(branchName: string, submoduleUrl: string) {
