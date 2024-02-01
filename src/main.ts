@@ -52,6 +52,8 @@ async function getBehindTime(path: string, commitHash: string) {
 async function getSubmodulePullRequestLink(branch: string, submoduleUrl: string) {
 	const pr = await getSubmodulePullRequestByBranchName(branch, submoduleUrl)
 
+	console.log('PR debug', pr, branch, submoduleUrl)
+
 	return pr ? `— [View ${pr.state} PR](${pr.html_url})` : ''
 }
 
