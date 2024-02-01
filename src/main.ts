@@ -34,7 +34,7 @@ async function getBehindComment(path: string, commitHash: string) {
 	const behind = await exec(`git -C ${path} rev-list --count HEAD..origin/main`)
 	const behindTime = Number(behind) ? await getBehindTime(path, commitHash) : ''
 
-	return behind + behindTime ? `(${behindTime})` : ''
+	return behind + (behindTime ? ` (${behindTime})` : '')
 }
 
 async function getBehindTime(path: string, commitHash: string) {

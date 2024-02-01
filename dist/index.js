@@ -35933,7 +35933,7 @@ exports.run = run;
 async function getBehindComment(path, commitHash) {
     const behind = await (0, bash_1.exec)(`git -C ${path} rev-list --count HEAD..origin/main`);
     const behindTime = Number(behind) ? await getBehindTime(path, commitHash) : '';
-    return behind + behindTime ? `(${behindTime})` : '';
+    return behind + (behindTime ? ` (${behindTime})` : '');
 }
 async function getBehindTime(path, commitHash) {
     const currentCommitDate = await (0, bash_1.exec)(`git -C ${path} show -s --format=%ci ${commitHash}`);
