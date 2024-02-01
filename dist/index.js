@@ -35917,21 +35917,25 @@ async function run(path) {
     await (0, bash_1.exec)(`git -C ${path} fetch --depth=50 origin +refs/heads/*:refs/remotes/origin/*`);
     const commitHash = await (0, bash_1.exec)(`git -C ${path} rev-parse HEAD`);
     const branch = (await (0, bash_1.exec)(`git -C ${path} name-rev --name-only HEAD`)).replace('remotes/origin/', '');
-    const behind = await getBehindComment(path, commitHash);
+    const behind = await getBehind(path, commitHash);
     const ahead = await (0, bash_1.exec)(`git -C ${path} rev-list --count origin/main..HEAD`);
     const submoduleName = await (0, bash_1.exec)(`basename $(git -C ${path} rev-parse --show-toplevel)`);
     const submoduleUrl = (await (0, bash_1.exec)(`git -C ${path} config --get remote.origin.url`)).replace('.git', '');
+    const lastCommit = await getLastCommit(path);
+    const exactStateLink = getExactStateLink(submoduleUrl, commitHash);
     const prLink = await getSubmodulePullRequestLink(branch, submoduleUrl);
+    const lastCommitLink = getLastCommitLink(submoduleUrl, commitHash);
     await comment(`**Submodule "${submoduleName}" status**
 
 - Current branch: **${branch}**
 - Behind main: **${behind}**
 - Ahead main: **${ahead}**
+- Last commit: ${lastCommit}
 
-[View exact state](${submoduleUrl}/tree/${commitHash}) ${prLink}`, submoduleName);
+${exactStateLink} ${prLink} ${lastCommitLink}`, submoduleName);
 }
 exports.run = run;
-async function getBehindComment(path, commitHash) {
+async function getBehind(path, commitHash) {
     const behind = await (0, bash_1.exec)(`git -C ${path} rev-list --count HEAD..origin/main`);
     const behindTime = Number(behind) ? await getBehindTime(path, commitHash) : '';
     return behind + (behindTime ? ` (${behindTime})` : '');
@@ -35944,6 +35948,14 @@ async function getBehindTime(path, commitHash) {
     const timeDiff = moment_1.default.duration(currentCommitMoment.diff(latestMainCommitMoment));
     return timeDiff.humanize();
 }
+async function getLastCommit(path) {
+    const lastCommitMessage = await (0, bash_1.exec)(`git -C ${path} log -1 --pretty=format:%s`);
+    const lastCommitAuthor = await (0, bash_1.exec)(`git -C ${path} log -1 --pretty=%an`);
+    return `"${lastCommitMessage.trim().substring(0, 60)}" by ${lastCommitAuthor.trim()}`;
+}
+function getExactStateLink(submoduleUrl, commitHash) {
+    return `[View exact state](${submoduleUrl}/tree/${commitHash})`;
+}
 async function getSubmodulePullRequestLink(branch, submoduleUrl) {
     const pr = await getSubmodulePullRequestByBranchName(branch, submoduleUrl);
     console.log('PR debug', pr, branch, submoduleUrl);
@@ -35955,6 +35967,9 @@ async function getSubmodulePullRequestByBranchName(branchName, submoduleUrl) {
     const repo = match[2];
     const pullRequests = await (0, githubRequests_1.getPullRequestsByBranchName)(owner, repo, branchName);
     return pullRequests.length ? pullRequests[0] : null;
+}
+function getLastCommitLink(submoduleUrl, commitHash) {
+    return `— [View last commit](${submoduleUrl}/commit/${commitHash})`;
 }
 async function comment(commentBody, submoduleName) {
     const comments = await (0, githubRequests_1.getPullRequestComments)();
