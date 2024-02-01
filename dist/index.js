@@ -32068,22 +32068,30 @@ async function run() {
     const ahead = aheadOutput.stdout.trim();
     const currentCommitHashOutput = await (0, exec_1.getExecOutput)('/bin/bash', ['-c', `git -C ${submodulePath} rev-parse HEAD`]);
     const currentCommitHash = currentCommitHashOutput.stdout.trim();
-    console.log;
+    const prUrl = await findPRByBranchName(octokit, currentBranch);
     const commentBody = `**Submodule status**
 
-Current branch:      ${currentBranch}
-Commits behind main: ${behind}
-Commits ahead main:  ${ahead}
+	Current branch:      ${currentBranch}
+	Commits behind main: ${behind}
+	Commits ahead main:  ${ahead}
 
-[Open submodule](https://github.com/${submoduleUrl}/tree/${currentCommitHash})`;
+[View exact state](https://github.com/${submoduleUrl}/tree/${currentCommitHash})
+[View PR](${prUrl})`;
     await findOrCreateComment(octokit, commentBody);
+}
+async function findPRByBranchName(octokit, branchName) {
+    const { data: pullRequests } = await octokit.rest.pulls.list({
+        ...github_1.context.repo,
+        head: `${github_1.context.repo.owner}:${branchName}`,
+    });
+    return pullRequests[0].html_url;
 }
 async function findOrCreateComment(octokit, commentBody) {
     const { data: comments } = await octokit.rest.issues.listComments({
         ...github_1.context.repo,
         issue_number: github_1.context.issue.number,
     });
-    const existingComment = comments.find((comment) => comment.body?.includes('The submodule is currently on the'));
+    const existingComment = comments.find((comment) => comment.body?.includes('Submodule status'));
     if (existingComment) {
         await octokit.rest.issues.updateComment({
             ...github_1.context.repo,
