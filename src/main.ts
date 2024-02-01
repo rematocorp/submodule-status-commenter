@@ -1,3 +1,4 @@
+import moment from 'moment'
 import {
 	createPullRequestComment,
 	getPullRequestComments,
@@ -5,7 +6,6 @@ import {
 	updatePullRequestComment,
 } from './githubRequests'
 import { exec } from './bash'
-import moment from 'moment'
 
 export async function run(path: string) {
 	await exec(`git -C ${path} fetch --depth=50 origin +refs/heads/*:refs/remotes/origin/*`)
@@ -54,7 +54,7 @@ async function getLastCommit(path: string) {
 	const lastCommitMessage = await exec(`git -C ${path} log -1 --pretty=format:%s`)
 	const lastCommitAuthor = await exec(`git -C ${path} log -1 --pretty=%an`)
 
-	return `"${lastCommitMessage.trim().substring(0, 50)}" by ${lastCommitAuthor.trim()}`
+	return `"${lastCommitMessage.trim().substring(0, 40)}" by ${lastCommitAuthor.trim()}`
 }
 
 async function getLinks(path: string, commitHash: string, branch: string) {
