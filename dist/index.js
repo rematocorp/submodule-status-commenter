@@ -30221,7 +30221,7 @@ async function run(path) {
     const behind = await (0, bash_1.exec)(`git -C ${path} rev-list --count HEAD..origin/main`);
     const ahead = await (0, bash_1.exec)(`git -C ${path} rev-list --count origin/main..HEAD`);
     const submoduleName = await (0, bash_1.exec)(`basename $(git -C ${path} rev-parse --show-toplevel)`);
-    const submoduleUrl = await (0, bash_1.exec)(`git -C ${path} config --get remote.origin.url`);
+    const submoduleUrl = (await (0, bash_1.exec)(`git -C ${path} config --get remote.origin.url`)).replace('.git', '');
     const prUrl = await getSubmodulePullRequestByBranchName(branch, submoduleUrl);
     await comment(`**Submodule "${submoduleName}" status**
 

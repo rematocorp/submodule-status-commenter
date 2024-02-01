@@ -14,7 +14,7 @@ export async function run(path: string) {
 	const behind = await exec(`git -C ${path} rev-list --count HEAD..origin/main`)
 	const ahead = await exec(`git -C ${path} rev-list --count origin/main..HEAD`)
 	const submoduleName = await exec(`basename $(git -C ${path} rev-parse --show-toplevel)`)
-	const submoduleUrl = await exec(`git -C ${path} config --get remote.origin.url`)
+	const submoduleUrl = (await exec(`git -C ${path} config --get remote.origin.url`)).replace('.git', '')
 	const prUrl = await getSubmodulePullRequestByBranchName(branch, submoduleUrl)
 
 	await comment(
