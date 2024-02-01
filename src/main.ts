@@ -12,23 +12,29 @@ export async function run(path: string) {
 
 	const commitHash = await exec(`git -C ${path} rev-parse HEAD`)
 	const branch = (await exec(`git -C ${path} name-rev --name-only HEAD`)).replace('remotes/origin/', '')
-	const behind = await exec(`git -C ${path} rev-list --count HEAD..origin/main`)
-	const behindTime = Number(behind) ? await getBehindTime(path, commitHash) : ''
+	const behind = await getBehindComment(path, commitHash)
 	const ahead = await exec(`git -C ${path} rev-list --count origin/main..HEAD`)
 	const submoduleName = await exec(`basename $(git -C ${path} rev-parse --show-toplevel)`)
 	const submoduleUrl = (await exec(`git -C ${path} config --get remote.origin.url`)).replace('.git', '')
-	const prUrl = await getSubmodulePullRequestByBranchName(branch, submoduleUrl)
+	const prLink = await getSubmodulePullRequestLink(branch, submoduleUrl)
 
 	await comment(
 		`**Submodule "${submoduleName}" status**
 
 - Current branch: **${branch}**
-- Behind main: **${behind} ${behindTime ? '(' + behindTime + ')' : ''}**
+- Behind main: **${behind}**
 - Ahead main: **${ahead}**
 
-[View exact state](${submoduleUrl}/tree/${commitHash}) ${prUrl ? ' — [View PR](' + prUrl + ')' : ''}`,
+[View exact state](${submoduleUrl}/tree/${commitHash}) ${prLink}`,
 		submoduleName,
 	)
+}
+
+async function getBehindComment(path: string, commitHash: string) {
+	const behind = await exec(`git -C ${path} rev-list --count HEAD..origin/main`)
+	const behindTime = Number(behind) ? await getBehindTime(path, commitHash) : ''
+
+	return behind + behindTime ? `(${behindTime})` : ''
 }
 
 async function getBehindTime(path: string, commitHash: string) {
@@ -43,6 +49,12 @@ async function getBehindTime(path: string, commitHash: string) {
 	return timeDiff.humanize()
 }
 
+async function getSubmodulePullRequestLink(branch: string, submoduleUrl: string) {
+	const pr = await getSubmodulePullRequestByBranchName(branch, submoduleUrl)
+
+	return pr ? `— [View ${pr.state} PR](${pr.html_url})` : ''
+}
+
 async function getSubmodulePullRequestByBranchName(branchName: string, submoduleUrl: string) {
 	const match = submoduleUrl.match(/https:\/\/[^\/]+\/([^\/]+)\/([^\.]+)/) || []
 	const owner = match[1]
@@ -50,7 +62,7 @@ async function getSubmodulePullRequestByBranchName(branchName: string, submodule
 
 	const pullRequests = await getPullRequestsByBranchName(owner, repo, branchName)
 
-	return pullRequests.length ? pullRequests[0].html_url : null
+	return pullRequests.length ? pullRequests[0] : null
 }
 
 async function comment(commentBody: string, submoduleName: string) {
