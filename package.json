@@ -1,43 +1,43 @@
 {
-  "name": "@remato/submodule-status-commenter",
-  "version": "0.0.1",
-  "license": "MIT",
-  "description": "GitHub action to comment submodules current branch and state to the PR",
-  "main": "dist/index.js",
-  "engines": {
-    "node": ">=20.0.0"
-  },
-  "scripts": {
-    "build": "ncc build src/index.ts",
-    "prettier": "prettier --list-different \"**/*.ts\"",
-    "lint": "eslint \"**/*.ts\""
-  },
-  "dependencies": {
-    "@actions/core": "^1.10.1",
-    "@actions/exec": "^1.1.1",
-    "@actions/github": "^6.0.0",
-    "@octokit/rest": "^20.0.2",
-    "axios": "^1.6.7",
-    "moment": "^2.30.1"
-  },
-  "devDependencies": {
-    "@remato/eslint-config": "^1.12.0",
-    "@remato/prettier-config": "^1.0.0",
-    "@vercel/ncc": "^0.38.1",
-    "eslint": "^8.56.0",
-    "prettier": "^3.2.4",
-    "typescript": "^5.3.3"
-  },
-  "prettier": "@remato/prettier-config",
-  "eslintConfig": {
-    "extends": [
-      "@remato/eslint-config/typescript"
-    ],
-    "ignorePatterns": [
-      "dist"
-    ],
-    "rules": {
-      "no-console": 0
-    }
-  }
+	"name": "@remato/submodule-status-commenter",
+	"version": "1.0.0",
+	"license": "MIT",
+	"description": "GitHub action to comment submodules current branch and state to the PR",
+	"main": "dist/index.js",
+	"engines": {
+		"node": ">=20.0.0"
+	},
+	"scripts": {
+		"build": "ncc build src/index.ts",
+		"prettier": "prettier --list-different \"**/*.ts\"",
+		"lint": "eslint \"**/*.ts\""
+	},
+	"dependencies": {
+		"@actions/core": "^1.10.1",
+		"@actions/exec": "^1.1.1",
+		"@actions/github": "^6.0.0",
+		"@octokit/rest": "^20.0.2",
+		"axios": "^1.6.7",
+		"moment": "^2.30.1"
+	},
+	"devDependencies": {
+		"@remato/eslint-config": "^1.12.0",
+		"@remato/prettier-config": "^1.0.0",
+		"@vercel/ncc": "^0.38.1",
+		"eslint": "^8.56.0",
+		"prettier": "^3.2.4",
+		"typescript": "^5.3.3"
+	},
+	"prettier": "@remato/prettier-config",
+	"eslintConfig": {
+		"extends": [
+			"@remato/eslint-config/typescript"
+		],
+		"ignorePatterns": [
+			"dist"
+		],
+		"rules": {
+			"no-console": 0
+		}
+	}
 }
