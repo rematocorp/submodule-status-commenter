@@ -32048,7 +32048,7 @@ async function run() {
     const githubToken = (0, core_1.getInput)('github-token', { required: true });
     const submodulePath = (0, core_1.getInput)('submodule-path', { required: true });
     const urlOutput = await (0, exec_1.getExecOutput)('/bin/bash', ['-c', `git -C ${submodulePath} config --get remote.origin.url`]);
-    const submoduleUrl = urlOutput.stdout;
+    const submoduleUrl = urlOutput.stdout.replace('.git', '');
     const octokit = (0, github_1.getOctokit)(githubToken);
     await (0, exec_1.exec)('/bin/bash', ['-c', `git -C ${submodulePath} fetch origin main`]);
     const currentBranchOutput = await (0, exec_1.getExecOutput)('/bin/bash', [
@@ -32076,7 +32076,7 @@ async function run() {
 	Commits behind main: ${behind}
 	Commits ahead main:  ${ahead}
 
-[View exact state](https://github.com/${submoduleUrl}/tree/${currentCommitHash})
+[View exact state](${submoduleUrl}/tree/${currentCommitHash})
 [View PR](${prUrl})`;
     await findOrCreateComment(octokit, commentBody);
 }
