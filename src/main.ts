@@ -41,7 +41,7 @@ async function getAge(path: string, commitHash: string) {
 
 	const timeDiff = moment.duration(currentCommitMoment.diff(latestMainCommitMoment))
 
-	return timeDiff.humanize(true)
+	return timeDiff.humanize()
 }
 
 async function getSubmodulePullRequestByBranchName(branchName: string, submoduleUrl: string) {

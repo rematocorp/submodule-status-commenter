@@ -35939,7 +35939,7 @@ async function getAge(path, commitHash) {
     const currentCommitMoment = (0, moment_1.default)(new Date(currentCommitDate.trim()));
     const latestMainCommitMoment = (0, moment_1.default)(new Date(latestMainCommitDate.trim()));
     const timeDiff = moment_1.default.duration(currentCommitMoment.diff(latestMainCommitMoment));
-    return timeDiff.humanize(true);
+    return timeDiff.humanize();
 }
 async function getSubmodulePullRequestByBranchName(branchName, submoduleUrl) {
     const match = submoduleUrl.match(/https:\/\/[^\/]+\/([^\/]+)\/([^\.]+)/) || [];
