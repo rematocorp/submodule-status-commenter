@@ -6,7 +6,8 @@ import { exec, getExecOutput } from '@actions/exec'
 async function run() {
 	const githubToken = getInput('github-token', { required: true })
 	const submodulePath = getInput('submodule-path', { required: true })
-	const submoduleUrl = getInput('submodule-url', { required: true })
+	const urlOutput = await getExecOutput('/bin/bash', ['-c', `git -C ${submodulePath} config --get remote.origin.url`])
+	const submoduleUrl = urlOutput.stdout
 	const octokit = getOctokit(githubToken) as Octokit
 
 	await exec('/bin/bash', ['-c', `git -C ${submodulePath} fetch origin main`])
@@ -32,7 +33,7 @@ async function run() {
 
 	const currentCommitHashOutput = await getExecOutput('/bin/bash', ['-c', `git -C ${submodulePath} rev-parse HEAD`])
 	const currentCommitHash = currentCommitHashOutput.stdout.trim()
-	const prUrl = await findPRByBranchName(octokit, currentBranch)
+	const prUrl = await findPRByBranchName(octokit, currentBranch, submoduleUrl)
 
 	const commentBody = `**Submodule status**
 
@@ -46,15 +47,20 @@ async function run() {
 	await findOrCreateComment(octokit, commentBody)
 }
 
-async function findPRByBranchName(octokit: Octokit, branchName: string) {
+async function findPRByBranchName(octokit: Octokit, branchName: string, submoduleUrl: string) {
+	const match = submoduleUrl.match(/https:\/\/[^\/]+\/([^\/]+)\/([^\.]+)/) || []
+	const owner = match[1]
+	const repo = match[2]
+
 	const { data: pullRequests } = await octokit.rest.pulls.list({
-		...context.repo,
+		owner,
+		repo,
 		state: 'all',
+		head: `${owner}:${branchName}`,
 	})
 
 	console.log('PRs', pullRequests)
-
-	console.log('PR args', `${context.repo.owner}:${branchName}`)
+	console.log('PR args', `${owner}:${branchName}`)
 
 	return pullRequests.length ? pullRequests[0].html_url : null
 }

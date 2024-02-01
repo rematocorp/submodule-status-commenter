@@ -32047,7 +32047,8 @@ const exec_1 = __nccwpck_require__(1514);
 async function run() {
     const githubToken = (0, core_1.getInput)('github-token', { required: true });
     const submodulePath = (0, core_1.getInput)('submodule-path', { required: true });
-    const submoduleUrl = (0, core_1.getInput)('submodule-url', { required: true });
+    const urlOutput = await (0, exec_1.getExecOutput)('/bin/bash', ['-c', `git -C ${submodulePath} config --get remote.origin.url`]);
+    const submoduleUrl = urlOutput.stdout;
     const octokit = (0, github_1.getOctokit)(githubToken);
     await (0, exec_1.exec)('/bin/bash', ['-c', `git -C ${submodulePath} fetch origin main`]);
     const currentBranchOutput = await (0, exec_1.getExecOutput)('/bin/bash', [
@@ -32068,7 +32069,7 @@ async function run() {
     const ahead = aheadOutput.stdout.trim();
     const currentCommitHashOutput = await (0, exec_1.getExecOutput)('/bin/bash', ['-c', `git -C ${submodulePath} rev-parse HEAD`]);
     const currentCommitHash = currentCommitHashOutput.stdout.trim();
-    const prUrl = await findPRByBranchName(octokit, currentBranch);
+    const prUrl = await findPRByBranchName(octokit, currentBranch, submoduleUrl);
     const commentBody = `**Submodule status**
 
 	Current branch:      ${currentBranch}
@@ -32079,13 +32080,18 @@ async function run() {
 [View PR](${prUrl})`;
     await findOrCreateComment(octokit, commentBody);
 }
-async function findPRByBranchName(octokit, branchName) {
+async function findPRByBranchName(octokit, branchName, submoduleUrl) {
+    const match = submoduleUrl.match(/https:\/\/[^\/]+\/([^\/]+)\/([^\.]+)/) || [];
+    const owner = match[1];
+    const repo = match[2];
     const { data: pullRequests } = await octokit.rest.pulls.list({
-        ...github_1.context.repo,
+        owner,
+        repo,
         state: 'all',
+        head: `${owner}:${branchName}`,
     });
     console.log('PRs', pullRequests);
-    console.log('PR args', `${github_1.context.repo.owner}:${branchName}`);
+    console.log('PR args', `${owner}:${branchName}`);
     return pullRequests.length ? pullRequests[0].html_url : null;
 }
 async function findOrCreateComment(octokit, commentBody) {
