@@ -1,6 +1,6 @@
 # Git Submodule Status Commenter
 
-This action informs reviewers about the PR's submodule status:
+This action informs reviewers about the submodule status in the PR:
 
 > **Submodule "foo" status**
 >
