@@ -32082,8 +32082,10 @@ async function run() {
 async function findPRByBranchName(octokit, branchName) {
     const { data: pullRequests } = await octokit.rest.pulls.list({
         ...github_1.context.repo,
+        state: 'all',
         head: `${github_1.context.repo.owner}:${branchName}`,
     });
+    console.log('PR args', `${github_1.context.repo.owner}:${branchName}`);
     return pullRequests.length ? pullRequests[0].html_url : null;
 }
 async function findOrCreateComment(octokit, commentBody) {

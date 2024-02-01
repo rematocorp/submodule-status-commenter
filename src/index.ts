@@ -49,8 +49,11 @@ async function run() {
 async function findPRByBranchName(octokit: Octokit, branchName: string) {
 	const { data: pullRequests } = await octokit.rest.pulls.list({
 		...context.repo,
+		state: 'all',
 		head: `${context.repo.owner}:${branchName}`,
 	})
+
+	console.log('PR args', `${context.repo.owner}:${branchName}`)
 
 	return pullRequests.length ? pullRequests[0].html_url : null
 }
