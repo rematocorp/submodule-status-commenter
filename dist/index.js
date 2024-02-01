@@ -35864,6 +35864,7 @@ async function getPullRequestsByBranchName(owner, repo, branchName) {
     const { data: pullRequests } = await octokit.rest.pulls.list({
         owner,
         repo,
+        state: 'all',
         head: `${owner}:${branchName}`,
     });
     return pullRequests;
