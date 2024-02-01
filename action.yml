@@ -1,6 +1,6 @@
 author: Remato
 name: Git Submodule Status Commenter
-description: GitHub action to comment git submodules current branch and state to the PR
+description: GitHub action to comment git submodule status to the PR
 branding:
     color: gray-dark
     icon: git-branch
@@ -11,7 +11,6 @@ inputs:
     submodule-path:
         description: Path to the submodule directory
         required: true
-        default: false
 runs:
     using: node20
     main: 'dist/index.js'

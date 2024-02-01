@@ -31,5 +31,6 @@ jobs:
 
             - uses: rematocorp/submodule-status-commenter@v1
               with:
-                  github-token: ${{ secrets.GITHUB_TOKEN }} # Make sure this token allows to checkout the submodule
+                  github-token: ${{ secrets.GITHUB_TOKEN }} # Make sure this token can access the submodule
+                  submodule-path: packages/foo # Absolute path to the submodule in the parent repository
 ```
