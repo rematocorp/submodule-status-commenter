@@ -25,7 +25,7 @@ export async function run(path: string) {
 - Current branch: **${branch}**
 - Behind main: **${behind}**
 - Ahead main: **${ahead}**
-- Last commit: **${lastCommit}**
+- Last commit: *${lastCommit}*
 
 ${links}`,
 	)
@@ -54,7 +54,7 @@ async function getLastCommit(path: string) {
 	const lastCommitMessage = await exec(`git -C ${path} log -1 --pretty=format:%s`)
 	const lastCommitAuthor = await exec(`git -C ${path} log -1 --pretty=%an`)
 
-	return `"${lastCommitMessage.trim().substring(0, 72)}" by ${lastCommitAuthor.trim()}`
+	return `"${lastCommitMessage.trim().substring(0, 50)}" by ${lastCommitAuthor.trim()}`
 }
 
 async function getLinks(path: string, commitHash: string, branch: string) {
