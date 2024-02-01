@@ -35948,7 +35948,7 @@ async function getBehindTime(path, commitHash) {
 async function getLastCommit(path) {
     const lastCommitMessage = await (0, bash_1.exec)(`git -C ${path} log -1 --pretty=format:%s`);
     const lastCommitAuthor = await (0, bash_1.exec)(`git -C ${path} log -1 --pretty=%an`);
-    return `"${lastCommitMessage.trim().substring(0, 40)}" by ${lastCommitAuthor.trim()}`;
+    return `"${lastCommitMessage.trim().substring(0, 50)}" by ${lastCommitAuthor.trim()}`;
 }
 async function getLinks(path, commitHash, branch) {
     const submoduleUrl = (await (0, bash_1.exec)(`git -C ${path} config --get remote.origin.url`)).replace('.git', '');
