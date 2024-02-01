@@ -35920,15 +35920,14 @@ async function run(path) {
     const behind = await getBehind(path, commitHash);
     const ahead = await (0, bash_1.exec)(`git -C ${path} rev-list --count origin/main..HEAD`);
     const submoduleName = await (0, bash_1.exec)(`basename $(git -C ${path} rev-parse --show-toplevel)`);
-    const submoduleUrl = (await (0, bash_1.exec)(`git -C ${path} config --get remote.origin.url`)).replace('.git', '');
     const lastCommit = await getLastCommit(path);
-    const links = await getLinks(submoduleUrl, commitHash, branch);
+    const links = await getLinks(path, commitHash, branch);
     await comment(submoduleName, `**Submodule "${submoduleName}" status**
 
 - Current branch: **${branch}**
 - Behind main: **${behind}**
 - Ahead main: **${ahead}**
-- Last commit: ${lastCommit}
+- Last commit: **${lastCommit}**
 
 ${links}`);
 }
@@ -35949,9 +35948,10 @@ async function getBehindTime(path, commitHash) {
 async function getLastCommit(path) {
     const lastCommitMessage = await (0, bash_1.exec)(`git -C ${path} log -1 --pretty=format:%s`);
     const lastCommitAuthor = await (0, bash_1.exec)(`git -C ${path} log -1 --pretty=%an`);
-    return `"${lastCommitMessage.trim().substring(0, 60)}" by ${lastCommitAuthor.trim()}`;
+    return `"${lastCommitMessage.trim().substring(0, 72)}" by ${lastCommitAuthor.trim()}`;
 }
-async function getLinks(submoduleUrl, commitHash, branch) {
+async function getLinks(path, commitHash, branch) {
+    const submoduleUrl = (await (0, bash_1.exec)(`git -C ${path} config --get remote.origin.url`)).replace('.git', '');
     const exactStateLink = getExactStateLink(submoduleUrl, commitHash);
     const prLink = await getSubmodulePullRequestLink(branch, submoduleUrl);
     const lastCommitLink = getLastCommitLink(submoduleUrl, commitHash);

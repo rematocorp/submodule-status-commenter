@@ -15,9 +15,8 @@ export async function run(path: string) {
 	const behind = await getBehind(path, commitHash)
 	const ahead = await exec(`git -C ${path} rev-list --count origin/main..HEAD`)
 	const submoduleName = await exec(`basename $(git -C ${path} rev-parse --show-toplevel)`)
-	const submoduleUrl = (await exec(`git -C ${path} config --get remote.origin.url`)).replace('.git', '')
 	const lastCommit = await getLastCommit(path)
-	const links = await getLinks(submoduleUrl, commitHash, branch)
+	const links = await getLinks(path, commitHash, branch)
 
 	await comment(
 		submoduleName,
@@ -26,7 +25,7 @@ export async function run(path: string) {
 - Current branch: **${branch}**
 - Behind main: **${behind}**
 - Ahead main: **${ahead}**
-- Last commit: ${lastCommit}
+- Last commit: **${lastCommit}**
 
 ${links}`,
 	)
@@ -55,10 +54,12 @@ async function getLastCommit(path: string) {
 	const lastCommitMessage = await exec(`git -C ${path} log -1 --pretty=format:%s`)
 	const lastCommitAuthor = await exec(`git -C ${path} log -1 --pretty=%an`)
 
-	return `"${lastCommitMessage.trim().substring(0, 60)}" by ${lastCommitAuthor.trim()}`
+	return `"${lastCommitMessage.trim().substring(0, 72)}" by ${lastCommitAuthor.trim()}`
 }
 
-async function getLinks(submoduleUrl: string, commitHash: string, branch: string) {
+async function getLinks(path: string, commitHash: string, branch: string) {
+	const submoduleUrl = (await exec(`git -C ${path} config --get remote.origin.url`)).replace('.git', '')
+
 	const exactStateLink = getExactStateLink(submoduleUrl, commitHash)
 	const prLink = await getSubmodulePullRequestLink(branch, submoduleUrl)
 	const lastCommitLink = getLastCommitLink(submoduleUrl, commitHash)
