@@ -29,9 +29,9 @@ async function run() {
 }
 
 async function getSubmoduleBranchName(submodulePath: string) {
-	await getExecOutput('/bin/bash', [`cd ${submodulePath} && git fetch --all`])
+	await getExecOutput('/bin/bash', ['-c', `git -C ${submodulePath} fetch --all`])
 
-	const { stdout } = await getExecOutput('/bin/bash', [`cd ${submodulePath} && git branch -r --contains HEAD`])
+	const { stdout } = await getExecOutput('/bin/bash', ['-c', `git -C ${submodulePath} branch -r --contains HEAD`])
 
 	const branches = stdout
 		.split('\n')
