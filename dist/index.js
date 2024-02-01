@@ -35922,17 +35922,15 @@ async function run(path) {
     const submoduleName = await (0, bash_1.exec)(`basename $(git -C ${path} rev-parse --show-toplevel)`);
     const submoduleUrl = (await (0, bash_1.exec)(`git -C ${path} config --get remote.origin.url`)).replace('.git', '');
     const lastCommit = await getLastCommit(path);
-    const exactStateLink = getExactStateLink(submoduleUrl, commitHash);
-    const prLink = await getSubmodulePullRequestLink(branch, submoduleUrl);
-    const lastCommitLink = getLastCommitLink(submoduleUrl, commitHash);
-    await comment(`**Submodule "${submoduleName}" status**
+    const links = await getLinks(submoduleUrl, commitHash, branch);
+    await comment(submoduleName, `**Submodule "${submoduleName}" status**
 
 - Current branch: **${branch}**
 - Behind main: **${behind}**
 - Ahead main: **${ahead}**
 - Last commit: ${lastCommit}
 
-${exactStateLink} ${prLink} ${lastCommitLink}`, submoduleName);
+${links}`);
 }
 exports.run = run;
 async function getBehind(path, commitHash) {
@@ -35953,13 +35951,19 @@ async function getLastCommit(path) {
     const lastCommitAuthor = await (0, bash_1.exec)(`git -C ${path} log -1 --pretty=%an`);
     return `"${lastCommitMessage.trim().substring(0, 60)}" by ${lastCommitAuthor.trim()}`;
 }
+async function getLinks(submoduleUrl, commitHash, branch) {
+    const exactStateLink = getExactStateLink(submoduleUrl, commitHash);
+    const prLink = await getSubmodulePullRequestLink(branch, submoduleUrl);
+    const lastCommitLink = getLastCommitLink(submoduleUrl, commitHash);
+    return [exactStateLink, prLink, lastCommitLink].filter((link) => link).join(' — ');
+}
 function getExactStateLink(submoduleUrl, commitHash) {
     return `[View exact state](${submoduleUrl}/tree/${commitHash})`;
 }
 async function getSubmodulePullRequestLink(branch, submoduleUrl) {
     const pr = await getSubmodulePullRequestByBranchName(branch, submoduleUrl);
     console.log('PR debug', pr, branch, submoduleUrl);
-    return pr ? `— [View ${pr.state} PR](${pr.html_url})` : '';
+    return pr ? `[View ${pr.state} PR](${pr.html_url})` : '';
 }
 async function getSubmodulePullRequestByBranchName(branchName, submoduleUrl) {
     const match = submoduleUrl.match(/https:\/\/[^\/]+\/([^\/]+)\/([^\.]+)/) || [];
@@ -35969,9 +35973,9 @@ async function getSubmodulePullRequestByBranchName(branchName, submoduleUrl) {
     return pullRequests.length ? pullRequests[0] : null;
 }
 function getLastCommitLink(submoduleUrl, commitHash) {
-    return `— [View last commit](${submoduleUrl}/commit/${commitHash})`;
+    return `[View last commit](${submoduleUrl}/commit/${commitHash})`;
 }
-async function comment(commentBody, submoduleName) {
+async function comment(submoduleName, commentBody) {
     const comments = await (0, githubRequests_1.getPullRequestComments)();
     const existingComment = comments.find((comment) => comment.body?.includes(`Submodule "${submoduleName}" status`));
     if (existingComment) {
