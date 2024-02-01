@@ -12,7 +12,7 @@ async function run() {
 
 	const currentBranchOutput = await getExecOutput('/bin/bash', [
 		'-c',
-		`cd ${submodulePath} && git rev-parse --abbrev-ref HEAD`,
+		`cd ${submodulePath} && git name-rev --name-only HEAD`,
 	])
 	const currentBranch = currentBranchOutput.stdout.trim()
 

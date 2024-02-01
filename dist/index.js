@@ -32051,7 +32051,7 @@ async function run() {
     await (0, exec_1.exec)('/bin/bash', ['-c', `cd ${submodulePath} && git fetch origin main`]);
     const currentBranchOutput = await (0, exec_1.getExecOutput)('/bin/bash', [
         '-c',
-        `cd ${submodulePath} && git rev-parse --abbrev-ref HEAD`,
+        `cd ${submodulePath} && git name-rev --name-only HEAD`,
     ]);
     const currentBranch = currentBranchOutput.stdout.trim();
     const behindPromiseOutput = await (0, exec_1.getExecOutput)('/bin/bash', [
