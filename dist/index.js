@@ -35918,22 +35918,21 @@ async function run(path) {
     const commitHash = await (0, bash_1.exec)(`git -C ${path} rev-parse HEAD`);
     const branch = (await (0, bash_1.exec)(`git -C ${path} name-rev --name-only HEAD`)).replace('remotes/origin/', '');
     const behind = await (0, bash_1.exec)(`git -C ${path} rev-list --count HEAD..origin/main`);
+    const behindAge = behind ? await getBehindAge(path, commitHash) : '';
     const ahead = await (0, bash_1.exec)(`git -C ${path} rev-list --count origin/main..HEAD`);
     const submoduleName = await (0, bash_1.exec)(`basename $(git -C ${path} rev-parse --show-toplevel)`);
     const submoduleUrl = (await (0, bash_1.exec)(`git -C ${path} config --get remote.origin.url`)).replace('.git', '');
-    const age = await getAge(path, commitHash);
     const prUrl = await getSubmodulePullRequestByBranchName(branch, submoduleUrl);
     await comment(`**Submodule "${submoduleName}" status**
 
 - Current branch: **${branch}**
-- Behind main: **${behind}**
+- Behind main: **${behind}** ${behindAge ? '(' + behindAge + ')' : ''}
 - Ahead main: **${ahead}**
-- Age: **${age}**
 
 [View exact state](${submoduleUrl}/tree/${commitHash}) ${prUrl ? ' — [View open PR](' + prUrl + ')' : ''}`, submoduleName);
 }
 exports.run = run;
-async function getAge(path, commitHash) {
+async function getBehindAge(path, commitHash) {
     const currentCommitDate = await (0, bash_1.exec)(`git -C ${path} show -s --format=%ci ${commitHash}`);
     const latestMainCommitDate = await (0, bash_1.exec)(`git -C ${path} show -s --format=%ci origin/main`);
     const currentCommitMoment = (0, moment_1.default)(new Date(currentCommitDate.trim()));
