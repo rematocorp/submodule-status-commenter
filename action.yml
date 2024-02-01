@@ -1,0 +1,17 @@
+author: Remato
+name: Git Submodule Status Commenter
+description: GitHub action to comment git submodules current branch and state to the PR
+branding:
+    color: gray-dark
+    icon: git-branch
+inputs:
+    github-token:
+        description: GitHub token, https://docs.github.com/en/actions/reference/authentication-in-a-workflow.
+        required: true
+    submodule-path:
+        description: Path to the submodule directory
+        required: true
+        default: false
+runs:
+    using: node20
+    main: 'dist/index.js'
