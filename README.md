@@ -13,6 +13,11 @@ jobs:
     build:
         runs-on: ubuntu-latest
         steps:
+            - uses: actions/checkout@v4
+              with:
+                  token: ${{ secrets.GITHUB_TOKEN }}
+                  submodules: 'true'
+
             - uses: rematocorp/submodule-status-commenter@v1
               with:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
