@@ -6,6 +6,7 @@ import {
 	updatePullRequestComment,
 } from './githubRequests'
 import { exec } from './bash'
+import { context } from '@actions/github'
 
 export async function run(path: string) {
 	await exec(`git -C ${path} fetch --depth=50 origin +refs/heads/*:refs/remotes/origin/*`)
@@ -17,6 +18,8 @@ export async function run(path: string) {
 	const submoduleName = await exec(`basename $(git -C ${path} rev-parse --show-toplevel)`)
 	const lastCommit = await getLastCommit(path)
 	const links = await getLinks(path, commitHash, branch)
+
+	console.log('Workflow', context.workflow)
 
 	await comment(
 		submoduleName,

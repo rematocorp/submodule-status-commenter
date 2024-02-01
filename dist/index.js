@@ -35913,6 +35913,7 @@ exports.run = void 0;
 const moment_1 = __importDefault(__nccwpck_require__(9623));
 const githubRequests_1 = __nccwpck_require__(2963);
 const bash_1 = __nccwpck_require__(9134);
+const github_1 = __nccwpck_require__(5438);
 async function run(path) {
     await (0, bash_1.exec)(`git -C ${path} fetch --depth=50 origin +refs/heads/*:refs/remotes/origin/*`);
     const commitHash = await (0, bash_1.exec)(`git -C ${path} rev-parse HEAD`);
@@ -35922,6 +35923,7 @@ async function run(path) {
     const submoduleName = await (0, bash_1.exec)(`basename $(git -C ${path} rev-parse --show-toplevel)`);
     const lastCommit = await getLastCommit(path);
     const links = await getLinks(path, commitHash, branch);
+    console.log('Workflow', github_1.context.workflow);
     await comment(submoduleName, `**Submodule "${submoduleName}" status**
 
 - Current branch: **${branch}**
