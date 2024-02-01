@@ -30137,6 +30137,122 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 9134:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.exec = void 0;
+const exec_1 = __nccwpck_require__(1514);
+async function exec(command) {
+    const { stdout } = await (0, exec_1.getExecOutput)('/bin/bash', ['-c', command]);
+    return stdout.trim();
+}
+exports.exec = exec;
+
+
+/***/ }),
+
+/***/ 2963:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.createPullRequestComment = exports.updatePullRequestComment = exports.getPullRequestComments = exports.getPullRequestsByBranchName = void 0;
+const core_1 = __nccwpck_require__(2186);
+const github_1 = __nccwpck_require__(5438);
+const githubToken = (0, core_1.getInput)('github-token', { required: true });
+const octokit = (0, github_1.getOctokit)(githubToken);
+async function getPullRequestsByBranchName(owner, repo, branchName) {
+    const { data: pullRequests } = await octokit.rest.pulls.list({
+        owner,
+        repo,
+        state: 'open',
+        head: `${owner}:${branchName}`,
+    });
+    return pullRequests;
+}
+exports.getPullRequestsByBranchName = getPullRequestsByBranchName;
+async function getPullRequestComments() {
+    const { data: comments } = await octokit.rest.issues.listComments({
+        ...github_1.context.repo,
+        issue_number: github_1.context.issue.number,
+    });
+    return comments;
+}
+exports.getPullRequestComments = getPullRequestComments;
+async function updatePullRequestComment(commentId, body) {
+    console.log('Updating PR comment');
+    await octokit.rest.issues.updateComment({
+        ...github_1.context.repo,
+        comment_id: commentId,
+        body,
+    });
+}
+exports.updatePullRequestComment = updatePullRequestComment;
+async function createPullRequestComment(body) {
+    console.log('Creating PR comment');
+    await octokit.rest.issues.createComment({
+        ...github_1.context.repo,
+        issue_number: github_1.context.issue.number,
+        body,
+    });
+}
+exports.createPullRequestComment = createPullRequestComment;
+
+
+/***/ }),
+
+/***/ 399:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.run = void 0;
+const githubRequests_1 = __nccwpck_require__(2963);
+const bash_1 = __nccwpck_require__(9134);
+async function run(path) {
+    await (0, bash_1.exec)(`git -C ${path} fetch --depth=50 origin +refs/heads/*:refs/remotes/origin/*`);
+    const commitHash = await (0, bash_1.exec)(`git -C ${path} rev-parse HEAD`);
+    const branch = (await (0, bash_1.exec)(`git -C ${path} name-rev --name-only HEAD`)).replace('remotes/origin/', '');
+    const behind = await (0, bash_1.exec)(`git -C ${path} rev-list --count HEAD..origin/main`);
+    const ahead = await (0, bash_1.exec)(`git -C ${path} rev-list --count origin/main..HEAD`);
+    const submoduleName = await (0, bash_1.exec)(`basename $(git -C ${path} rev-parse --show-toplevel)`);
+    const submoduleUrl = await (0, bash_1.exec)(`git -C ${path} config --get remote.origin.url`);
+    const prUrl = await getSubmodulePullRequestByBranchName(branch, submoduleUrl);
+    await comment(`**Submodule "${submoduleName}" status**
+
+- Current branch: **${branch}**
+- Commits behind main: **${behind}**
+- Commits ahead main: **${ahead}**
+
+[View exact state](${submoduleUrl}/tree/${commitHash}) ${prUrl ? '[View open PR](' + prUrl + ')' : ''}`, submoduleName);
+}
+exports.run = run;
+async function getSubmodulePullRequestByBranchName(branchName, submoduleUrl) {
+    const match = submoduleUrl.match(/https:\/\/[^\/]+\/([^\/]+)\/([^\.]+)/) || [];
+    const owner = match[1];
+    const repo = match[2];
+    const pullRequests = await (0, githubRequests_1.getPullRequestsByBranchName)(owner, repo, branchName);
+    return pullRequests.length ? pullRequests[0].html_url : null;
+}
+async function comment(commentBody, submoduleName) {
+    const comments = await (0, githubRequests_1.getPullRequestComments)();
+    const existingComment = comments.find((comment) => comment.body?.includes(`Submodule "${submoduleName}" status`));
+    if (existingComment) {
+        await (0, githubRequests_1.updatePullRequestComment)(existingComment.id, commentBody);
+    }
+    else {
+        await (0, githubRequests_1.createPullRequestComment)(commentBody);
+    }
+}
+
+
+/***/ }),
+
 /***/ 9491:
 /***/ ((module) => {
 
@@ -32042,84 +32158,8 @@ var exports = __webpack_exports__;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core_1 = __nccwpck_require__(2186);
-const github_1 = __nccwpck_require__(5438);
-const exec_1 = __nccwpck_require__(1514);
-async function run() {
-    const githubToken = (0, core_1.getInput)('github-token', { required: true });
-    const submodulePath = (0, core_1.getInput)('submodule-path', { required: true });
-    const urlOutput = await (0, exec_1.getExecOutput)('/bin/bash', ['-c', `git -C ${submodulePath} config --get remote.origin.url`]);
-    const submoduleUrl = urlOutput.stdout.trim().replace('.git', '');
-    const octokit = (0, github_1.getOctokit)(githubToken);
-    await (0, exec_1.exec)('/bin/bash', [
-        '-c',
-        `git -C ${submodulePath} fetch --depth=50 origin +refs/heads/*:refs/remotes/origin/*`,
-    ]);
-    const currentBranchOutput = await (0, exec_1.getExecOutput)('/bin/bash', [
-        '-c',
-        `git -C ${submodulePath} name-rev --name-only HEAD`,
-    ]);
-    const currentBranch = currentBranchOutput.stdout.trim().replace('remotes/origin/', '');
-    console.log('Current branch', currentBranch);
-    const behindPromiseOutput = await (0, exec_1.getExecOutput)('/bin/bash', [
-        '-c',
-        `git -C ${submodulePath} rev-list --count HEAD..origin/main`,
-    ]);
-    const behind = behindPromiseOutput.stdout.trim();
-    const aheadOutput = await (0, exec_1.getExecOutput)('/bin/bash', [
-        '-c',
-        `git -C ${submodulePath} rev-list --count origin/main..HEAD`,
-    ]);
-    const ahead = aheadOutput.stdout.trim();
-    const currentCommitHashOutput = await (0, exec_1.getExecOutput)('/bin/bash', ['-c', `git -C ${submodulePath} rev-parse HEAD`]);
-    const currentCommitHash = currentCommitHashOutput.stdout.trim();
-    const prUrl = await findPRByBranchName(octokit, currentBranch, submoduleUrl);
-    const commentBody = `**Submodule status**
-
-	Current branch:      ${currentBranch}
-	Commits behind main: ${behind}
-	Commits ahead main:  ${ahead}
-
-[View exact state](${submoduleUrl}/tree/${currentCommitHash})
-[View PR](${prUrl})`;
-    await findOrCreateComment(octokit, commentBody);
-}
-async function findPRByBranchName(octokit, branchName, submoduleUrl) {
-    const match = submoduleUrl.match(/https:\/\/[^\/]+\/([^\/]+)\/([^\.]+)/) || [];
-    const owner = match[1];
-    const repo = match[2];
-    console.log('PR pre', owner, repo, github_1.context.repo);
-    const { data: pullRequests } = await octokit.rest.pulls.list({
-        owner,
-        repo,
-        state: 'all',
-        head: `${owner}:${branchName}`,
-    });
-    console.log('PRs', pullRequests);
-    console.log('PR args', `${owner}:${branchName}`);
-    return pullRequests.length ? pullRequests[0].html_url : null;
-}
-async function findOrCreateComment(octokit, commentBody) {
-    const { data: comments } = await octokit.rest.issues.listComments({
-        ...github_1.context.repo,
-        issue_number: github_1.context.issue.number,
-    });
-    const existingComment = comments.find((comment) => comment.body?.includes('Submodule status'));
-    if (existingComment) {
-        await octokit.rest.issues.updateComment({
-            ...github_1.context.repo,
-            comment_id: existingComment.id,
-            body: commentBody,
-        });
-    }
-    else {
-        await octokit.rest.issues.createComment({
-            ...github_1.context.repo,
-            issue_number: github_1.context.issue.number,
-            body: commentBody,
-        });
-    }
-}
-run();
+const main_1 = __nccwpck_require__(399);
+(0, main_1.run)((0, core_1.getInput)('submodule-path', { required: true }));
 
 })();
 
