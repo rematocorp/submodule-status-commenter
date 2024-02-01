@@ -1,6 +1,16 @@
 # Git Submodule Status Commenter
 
-This action informs PR reviewers about the status of submodules the PR is using: their current branch and how many commits is the submodule behind or ahead of the main branch.
+This action informs PR reviewers about the submodule status the PR is using:
+
+> **Submodule "Foo" status**
+>
+> -   Current branch: **feature/bar**
+> -   Commits behind main: **2**
+> -   Commits ahead main: **10**
+>
+> [View exact state]() — [View open PR]()
+
+The action currently works only with one submodule. Create an issue if you wish us to support more (recursive) submodules.
 
 ## Configuration
 
@@ -17,9 +27,8 @@ jobs:
               with:
                   token: ${{ secrets.GITHUB_TOKEN }}
                   submodules: true
-                  fetch-depth: 0
 
             - uses: rematocorp/submodule-status-commenter@v1
               with:
-                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  github-token: ${{ secrets.GITHUB_TOKEN }} # Make sure this token allows to checkout the submodule
 ```
