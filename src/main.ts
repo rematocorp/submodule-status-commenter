@@ -13,7 +13,7 @@ export async function run(path: string) {
 	const commitHash = await exec(`git -C ${path} rev-parse HEAD`)
 	const branch = (await exec(`git -C ${path} name-rev --name-only HEAD`)).replace('remotes/origin/', '')
 	const behind = await exec(`git -C ${path} rev-list --count HEAD..origin/main`)
-	const behindTime = Number(behind) ? await getBehindAge(path, commitHash) : ''
+	const behindTime = Number(behind) ? await getBehindTime(path, commitHash) : ''
 	const ahead = await exec(`git -C ${path} rev-list --count origin/main..HEAD`)
 	const submoduleName = await exec(`basename $(git -C ${path} rev-parse --show-toplevel)`)
 	const submoduleUrl = (await exec(`git -C ${path} config --get remote.origin.url`)).replace('.git', '')
@@ -31,7 +31,7 @@ export async function run(path: string) {
 	)
 }
 
-async function getBehindAge(path: string, commitHash: string) {
+async function getBehindTime(path: string, commitHash: string) {
 	const currentCommitDate = await exec(`git -C ${path} show -s --format=%ci ${commitHash}`)
 	const latestMainCommitDate = await exec(`git -C ${path} show -s --format=%ci origin/main`)
 
