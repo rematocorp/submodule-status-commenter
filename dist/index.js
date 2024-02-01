@@ -32049,11 +32049,7 @@ async function run() {
     const submodulePath = (0, core_1.getInput)('submodule-path', { required: true });
     const octokit = (0, github_1.getOctokit)(githubToken);
     await (0, exec_1.exec)('/bin/bash', ['-c', `cd ${submodulePath} && git fetch origin main`]);
-    const currentBranchOutput = await (0, exec_1.getExecOutput)('/bin/bash', [
-        '-c',
-        `cd ${submodulePath} && git name-rev --name-only HEAD`,
-    ]);
-    const currentBranch = currentBranchOutput.stdout.trim();
+    const currentBranch = await getSubmoduleBranchName(submodulePath);
     const behindPromiseOutput = await (0, exec_1.getExecOutput)('/bin/bash', [
         '-c',
         `cd ${submodulePath} && git rev-list --count HEAD..origin/main`,
@@ -32066,6 +32062,17 @@ async function run() {
     const ahead = aheadOutput.stdout.trim();
     const commentBody = `The submodule is currently on the "${currentBranch}" branch, which is ${behind} commits behind and ${ahead} commits ahead of the "main" branch.`;
     await findOrCreateComment(octokit, commentBody);
+}
+async function getSubmoduleBranchName(submodulePath) {
+    await (0, exec_1.getExecOutput)('/bin/bash', [`git -C ${submodulePath} fetch --all`]);
+    const { stdout } = await (0, exec_1.getExecOutput)('/bin/bash', [`git -C ${submodulePath} branch -r --contains HEAD`]);
+    const branches = stdout
+        .split('\n')
+        .map((line) => line.trim())
+        .filter((line) => line.startsWith('origin/'))
+        .map((line) => line.replace('origin/', ''));
+    const branchName = branches.find((branch) => !branch.includes('HEAD')) || 'unknown';
+    return branchName;
 }
 async function findOrCreateComment(octokit, commentBody) {
     const { data: comments } = await octokit.rest.issues.listComments({

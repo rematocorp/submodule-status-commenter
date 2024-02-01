@@ -10,7 +10,7 @@ on:
     pull_request:
         types: [opened, edited, closed, reopened, ready_for_review, converted_to_draft]
 jobs:
-    build:
+    run:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
