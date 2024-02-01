@@ -32050,6 +32050,7 @@ async function run() {
     const octokit = (0, github_1.getOctokit)(githubToken);
     await (0, exec_1.exec)('/bin/bash', ['-c', `cd ${submodulePath} && git fetch origin main`]);
     const currentBranch = await getSubmoduleBranchName(submodulePath);
+    console.log('Current branch', currentBranch);
     const behindPromiseOutput = await (0, exec_1.getExecOutput)('/bin/bash', [
         '-c',
         `cd ${submodulePath} && git rev-list --count HEAD..origin/main`,
@@ -32071,6 +32072,7 @@ async function getSubmoduleBranchName(submodulePath) {
         .map((line) => line.trim())
         .filter((line) => line.startsWith('origin/'))
         .map((line) => line.replace('origin/', ''));
+    console.log('Branches', branches);
     const branchName = branches.find((branch) => !branch.includes('HEAD')) || 'unknown';
     return branchName;
 }

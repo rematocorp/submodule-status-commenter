@@ -12,6 +12,8 @@ async function run() {
 
 	const currentBranch = await getSubmoduleBranchName(submodulePath)
 
+	console.log('Current branch', currentBranch)
+
 	const behindPromiseOutput = await getExecOutput('/bin/bash', [
 		'-c',
 		`cd ${submodulePath} && git rev-list --count HEAD..origin/main`,
@@ -38,6 +40,8 @@ async function getSubmoduleBranchName(submodulePath: string) {
 		.map((line) => line.trim())
 		.filter((line) => line.startsWith('origin/'))
 		.map((line) => line.replace('origin/', ''))
+
+	console.log('Branches', branches)
 
 	const branchName = branches.find((branch) => !branch.includes('HEAD')) || 'unknown'
 
