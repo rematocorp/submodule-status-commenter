@@ -32049,10 +32049,12 @@ async function run() {
     const submodulePath = (0, core_1.getInput)('submodule-path', { required: true });
     const octokit = (0, github_1.getOctokit)(githubToken);
     await (0, exec_1.exec)('/bin/bash', ['-c', `cd ${submodulePath}`]);
-    await (0, exec_1.exec)('/bin/bash', ['-c', 'git fetch origin']);
-    const currentBranch = await (0, exec_1.exec)('/bin/bash', ['-c', 'git rev-parse --abbrev-ref HEAD']).toString().trim();
-    const behind = await (0, exec_1.exec)('/bin/bash', ['-c', 'git rev-list --count HEAD..origin/main']).toString().trim();
-    const ahead = await (0, exec_1.exec)('/bin/bash', ['-c', 'git rev-list --count origin/main..HEAD']).toString().trim();
+    const currentBranchOutput = await (0, exec_1.getExecOutput)('/bin/bash', ['-c', 'git rev-parse --abbrev-ref HEAD']);
+    const currentBranch = currentBranchOutput.stdout.trim();
+    const behindPromiseOutput = await (0, exec_1.getExecOutput)('/bin/bash', ['-c', 'git rev-list --count HEAD..origin/main']);
+    const behind = behindPromiseOutput.stdout.trim();
+    const aheadOutput = await (0, exec_1.getExecOutput)('/bin/bash', ['-c', 'git rev-list --count origin/main..HEAD']);
+    const ahead = aheadOutput.stdout.trim();
     const commentBody = `The submodule is currently on the "${currentBranch}" branch, which is ${behind} commits behind and ${ahead} commits ahead of the "main" branch.`;
     await findOrCreateComment(octokit, commentBody);
 }
