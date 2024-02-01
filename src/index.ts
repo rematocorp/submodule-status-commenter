@@ -52,6 +52,8 @@ async function findPRByBranchName(octokit: Octokit, branchName: string, submodul
 	const owner = match[1]
 	const repo = match[2]
 
+	console.log('PR pre', owner, repo, context.repo)
+
 	const { data: pullRequests } = await octokit.rest.pulls.list({
 		owner,
 		repo,

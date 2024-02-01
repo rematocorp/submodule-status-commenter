@@ -32084,6 +32084,7 @@ async function findPRByBranchName(octokit, branchName, submoduleUrl) {
     const match = submoduleUrl.match(/https:\/\/[^\/]+\/([^\/]+)\/([^\.]+)/) || [];
     const owner = match[1];
     const repo = match[2];
+    console.log('PR pre', owner, repo, github_1.context.repo);
     const { data: pullRequests } = await octokit.rest.pulls.list({
         owner,
         repo,
