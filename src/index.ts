@@ -7,7 +7,7 @@ async function run() {
 	const githubToken = getInput('github-token', { required: true })
 	const submodulePath = getInput('submodule-path', { required: true })
 	const urlOutput = await getExecOutput('/bin/bash', ['-c', `git -C ${submodulePath} config --get remote.origin.url`])
-	const submoduleUrl = urlOutput.stdout.replace('.git', '')
+	const submoduleUrl = urlOutput.stdout.trim().replace('.git', '')
 	const octokit = getOctokit(githubToken) as Octokit
 
 	await exec('/bin/bash', ['-c', `git -C ${submodulePath} fetch origin main`])
