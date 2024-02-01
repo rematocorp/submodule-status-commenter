@@ -15,7 +15,7 @@ async function run() {
 		'-c',
 		`git -C ${submodulePath} name-rev --name-only HEAD`,
 	])
-	const currentBranch = currentBranchOutput.stdout.trim()
+	const currentBranch = currentBranchOutput.stdout.trim().replace('remotes/origin/', '')
 
 	console.log('Current branch', currentBranch)
 
@@ -52,7 +52,7 @@ async function findPRByBranchName(octokit: Octokit, branchName: string) {
 		head: `${context.repo.owner}:${branchName}`,
 	})
 
-	return pullRequests[0].html_url
+	return pullRequests.length ? pullRequests[0].html_url : null
 }
 
 async function findOrCreateComment(octokit: Octokit, commentBody: string) {

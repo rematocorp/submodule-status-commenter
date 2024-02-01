@@ -32054,7 +32054,7 @@ async function run() {
         '-c',
         `git -C ${submodulePath} name-rev --name-only HEAD`,
     ]);
-    const currentBranch = currentBranchOutput.stdout.trim();
+    const currentBranch = currentBranchOutput.stdout.trim().replace('remotes/origin/', '');
     console.log('Current branch', currentBranch);
     const behindPromiseOutput = await (0, exec_1.getExecOutput)('/bin/bash', [
         '-c',
@@ -32084,7 +32084,7 @@ async function findPRByBranchName(octokit, branchName) {
         ...github_1.context.repo,
         head: `${github_1.context.repo.owner}:${branchName}`,
     });
-    return pullRequests[0].html_url;
+    return pullRequests.length ? pullRequests[0].html_url : null;
 }
 async function findOrCreateComment(octokit, commentBody) {
     const { data: comments } = await octokit.rest.issues.listComments({
