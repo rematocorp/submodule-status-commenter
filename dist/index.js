@@ -35864,7 +35864,6 @@ async function getPullRequestsByBranchName(owner, repo, branchName) {
     const { data: pullRequests } = await octokit.rest.pulls.list({
         owner,
         repo,
-        state: 'open',
         head: `${owner}:${branchName}`,
     });
     return pullRequests;
@@ -35929,7 +35928,7 @@ async function run(path) {
 - Behind main: **${behind} ${behindTime ? '(' + behindTime + ')' : ''}**
 - Ahead main: **${ahead}**
 
-[View exact state](${submoduleUrl}/tree/${commitHash}) ${prUrl ? ' — [View open PR](' + prUrl + ')' : ''}`, submoduleName);
+[View exact state](${submoduleUrl}/tree/${commitHash}) ${prUrl ? ' — [View PR](' + prUrl + ')' : ''}`, submoduleName);
 }
 exports.run = run;
 async function getBehindTime(path, commitHash) {

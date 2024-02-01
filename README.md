@@ -1,14 +1,14 @@
 # Git Submodule Status Commenter
 
-This action informs PR reviewers about the submodule status the PR is using:
+This action informs reviewers about the PR's submodule status:
 
 > **Submodule "Foo" status**
 >
 > -   Current branch: **feature/bar**
-> -   Behind main: **2**
-> -   Ahead main: **10**
+> -   Behind main: **2 (4 days)**
+> -   Ahead main: **1**
 >
-> [View exact state]() — [View open PR]()
+> [View exact state]() — [View PR]()
 
 The action currently works only with one submodule. Create an issue if you wish us to support more (recursive) submodules.
 
