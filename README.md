@@ -16,7 +16,8 @@ jobs:
             - uses: actions/checkout@v4
               with:
                   token: ${{ secrets.GITHUB_TOKEN }}
-                  submodules: 'true'
+                  submodules: true
+                  fetch-depth: 0
 
             - uses: rematocorp/submodule-status-commenter@v1
               with:
