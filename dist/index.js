@@ -32064,8 +32064,8 @@ async function run() {
     await findOrCreateComment(octokit, commentBody);
 }
 async function getSubmoduleBranchName(submodulePath) {
-    await (0, exec_1.getExecOutput)('/bin/bash', [`git -C ${submodulePath} fetch --all`]);
-    const { stdout } = await (0, exec_1.getExecOutput)('/bin/bash', [`git -C ${submodulePath} branch -r --contains HEAD`]);
+    await (0, exec_1.getExecOutput)('/bin/bash', [`cd ${submodulePath} && git fetch --all`]);
+    const { stdout } = await (0, exec_1.getExecOutput)('/bin/bash', [`cd ${submodulePath} && git branch -r --contains HEAD`]);
     const branches = stdout
         .split('\n')
         .map((line) => line.trim())
