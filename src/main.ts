@@ -24,7 +24,7 @@ export async function run(path: string) {
 - Commits behind main: **${behind}**
 - Commits ahead main: **${ahead}**
 
-[View exact state](${submoduleUrl}/tree/${commitHash}) ${prUrl ? '[View open PR](' + prUrl + ')' : ''}`,
+[View exact state](${submoduleUrl}/tree/${commitHash}) ${prUrl ? ' — [View open PR](' + prUrl + ')' : ''}`,
 		submoduleName,
 	)
 }

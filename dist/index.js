@@ -30229,7 +30229,7 @@ async function run(path) {
 - Commits behind main: **${behind}**
 - Commits ahead main: **${ahead}**
 
-[View exact state](${submoduleUrl}/tree/${commitHash}) ${prUrl ? '[View open PR](' + prUrl + ')' : ''}`, submoduleName);
+[View exact state](${submoduleUrl}/tree/${commitHash}) ${prUrl ? ' — [View open PR](' + prUrl + ')' : ''}`, submoduleName);
 }
 exports.run = run;
 async function getSubmodulePullRequestByBranchName(branchName, submoduleUrl) {
