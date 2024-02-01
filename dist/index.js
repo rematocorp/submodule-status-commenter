@@ -32068,13 +32068,14 @@ async function run() {
     const ahead = aheadOutput.stdout.trim();
     const currentCommitHashOutput = await (0, exec_1.getExecOutput)('/bin/bash', ['-c', `git -C ${submodulePath} rev-parse HEAD`]);
     const currentCommitHash = currentCommitHashOutput.stdout.trim();
+    console.log;
     const commentBody = `**Submodule status**
 
-	Current branch:      ${currentBranch}
-	Commits behind main: ${behind}
-	Commits ahead main:  ${ahead}
+Current branch:      ${currentBranch}
+Commits behind main: ${behind}
+Commits ahead main:  ${ahead}
 
-	[Open submodule](https://github.com/${submoduleUrl}/tree/${currentCommitHash}})`;
+[Open submodule](https://github.com/${submoduleUrl}/tree/${currentCommitHash})`;
     await findOrCreateComment(octokit, commentBody);
 }
 async function findOrCreateComment(octokit, commentBody) {
