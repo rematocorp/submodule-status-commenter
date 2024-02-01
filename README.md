@@ -19,7 +19,7 @@ The action currently works only with one submodule. Create an issue if you wish 
 name: Submodule status commenter
 on:
     pull_request:
-        types: [opened, synchronize, reopened]
+        types: [opened, synchronize, reopened, ready_for_review]
 jobs:
     run:
         runs-on: ubuntu-latest
