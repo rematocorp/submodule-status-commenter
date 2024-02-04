@@ -35914,8 +35914,8 @@ const moment_1 = __importDefault(__nccwpck_require__(9623));
 const githubRequests_1 = __nccwpck_require__(2963);
 const bash_1 = __nccwpck_require__(9134);
 async function run(path) {
-    await (0, bash_1.exec)(`git -C ${path} fetch origin main`);
-    await (0, bash_1.exec)(`git -C ${path} fetch --depth=50 origin +refs/heads/*:refs/remotes/origin/*`);
+    await (0, bash_1.exec)(`git -C ${path} fetch --depth=100 origin main`);
+    await (0, bash_1.exec)(`git -C ${path} fetch --depth=100 origin +refs/heads/*:refs/remotes/origin/*`);
     const commitHash = await (0, bash_1.exec)(`git -C ${path} rev-parse HEAD`);
     const branch = (await (0, bash_1.exec)(`git -C ${path} name-rev --name-only HEAD`)).replace('remotes/origin/', '');
     const behind = await getBehind(path, commitHash);
