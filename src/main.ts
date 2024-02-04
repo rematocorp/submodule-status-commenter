@@ -8,6 +8,7 @@ import {
 import { exec } from './bash'
 
 export async function run(path: string) {
+	await exec(`git -C ${path} fetch origin main`)
 	await exec(`git -C ${path} fetch --depth=50 origin +refs/heads/*:refs/remotes/origin/*`)
 
 	const commitHash = await exec(`git -C ${path} rev-parse HEAD`)
