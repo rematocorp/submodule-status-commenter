@@ -35913,7 +35913,6 @@ exports.run = void 0;
 const moment_1 = __importDefault(__nccwpck_require__(9623));
 const githubRequests_1 = __nccwpck_require__(2963);
 const bash_1 = __nccwpck_require__(9134);
-const github_1 = __nccwpck_require__(5438);
 async function run(path) {
     await (0, bash_1.exec)(`git -C ${path} fetch --depth=50 origin +refs/heads/*:refs/remotes/origin/*`);
     const commitHash = await (0, bash_1.exec)(`git -C ${path} rev-parse HEAD`);
@@ -35923,7 +35922,6 @@ async function run(path) {
     const submoduleName = await (0, bash_1.exec)(`basename $(git -C ${path} rev-parse --show-toplevel)`);
     const lastCommit = await getLastCommit(path);
     const links = await getLinks(path, commitHash, branch);
-    console.log('Workflow', github_1.context.workflow);
     await comment(submoduleName, `**Submodule "${submoduleName}" status**
 
 - Current branch: **${branch}**
@@ -35948,9 +35946,15 @@ async function getBehindTime(path, commitHash) {
     return timeDiff.humanize();
 }
 async function getLastCommit(path) {
-    const lastCommitMessage = await (0, bash_1.exec)(`git -C ${path} log -1 --pretty=format:%s`);
-    const lastCommitAuthor = await (0, bash_1.exec)(`git -C ${path} log -1 --pretty=%an`);
-    return `"${lastCommitMessage.trim().substring(0, 50)}" by ${lastCommitAuthor.trim()}`;
+    const submodule = await (0, bash_1.exec)(`git -C ${path} remote get-url origin | sed -e 's/.*:\/\/github.com\///' -e 's/.*:\/\///' -e 's/\.git$//'
+	`);
+    const author = await (0, bash_1.exec)(`git -C ${path} log -1 --pretty=%an`);
+    const message = await (0, bash_1.exec)(`git -C ${path} log -1 --pretty=format:%s`);
+    const formattedMessage = message
+        .trim()
+        .substring(0, 50)
+        .replace('Merge pull request #', `Merge pull request ${submodule}#`);
+    return `"${formattedMessage.trim().substring(0, submodule.length + 50)}" by ${author.trim()}`;
 }
 async function getLinks(path, commitHash, branch) {
     const submoduleUrl = (await (0, bash_1.exec)(`git -C ${path} config --get remote.origin.url`)).replace('.git', '');
@@ -35964,7 +35968,6 @@ function getExactStateLink(submoduleUrl, commitHash) {
 }
 async function getSubmodulePullRequestLink(branch, submoduleUrl) {
     const pr = await getSubmodulePullRequestByBranchName(branch, submoduleUrl);
-    console.log('PR debug', pr, branch, submoduleUrl);
     return pr ? `[View ${pr.state} PR](${pr.html_url})` : '';
 }
 async function getSubmodulePullRequestByBranchName(branchName, submoduleUrl) {

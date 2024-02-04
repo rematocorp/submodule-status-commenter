@@ -6,7 +6,6 @@ import {
 	updatePullRequestComment,
 } from './githubRequests'
 import { exec } from './bash'
-import { context } from '@actions/github'
 
 export async function run(path: string) {
 	await exec(`git -C ${path} fetch --depth=50 origin +refs/heads/*:refs/remotes/origin/*`)
@@ -18,8 +17,6 @@ export async function run(path: string) {
 	const submoduleName = await exec(`basename $(git -C ${path} rev-parse --show-toplevel)`)
 	const lastCommit = await getLastCommit(path)
 	const links = await getLinks(path, commitHash, branch)
-
-	console.log('Workflow', context.workflow)
 
 	await comment(
 		submoduleName,
@@ -54,10 +51,17 @@ async function getBehindTime(path: string, commitHash: string) {
 }
 
 async function getLastCommit(path: string) {
-	const lastCommitMessage = await exec(`git -C ${path} log -1 --pretty=format:%s`)
-	const lastCommitAuthor = await exec(`git -C ${path} log -1 --pretty=%an`)
+	const submodule =
+		await exec(`git -C ${path} remote get-url origin | sed -e 's/.*:\/\/github.com\///' -e 's/.*:\/\///' -e 's/\.git$//'
+	`)
+	const author = await exec(`git -C ${path} log -1 --pretty=%an`)
+	const message = await exec(`git -C ${path} log -1 --pretty=format:%s`)
+	const formattedMessage = message
+		.trim()
+		.substring(0, 50)
+		.replace('Merge pull request #', `Merge pull request ${submodule}#`)
 
-	return `"${lastCommitMessage.trim().substring(0, 50)}" by ${lastCommitAuthor.trim()}`
+	return `"${formattedMessage.trim().substring(0, submodule.length + 50)}" by ${author.trim()}`
 }
 
 async function getLinks(path: string, commitHash: string, branch: string) {
@@ -76,8 +80,6 @@ function getExactStateLink(submoduleUrl: string, commitHash: string) {
 
 async function getSubmodulePullRequestLink(branch: string, submoduleUrl: string) {
 	const pr = await getSubmodulePullRequestByBranchName(branch, submoduleUrl)
-
-	console.log('PR debug', pr, branch, submoduleUrl)
 
 	return pr ? `[View ${pr.state} PR](${pr.html_url})` : ''
 }
