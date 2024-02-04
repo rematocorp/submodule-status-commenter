@@ -52,7 +52,7 @@ async function getBehindTime(path: string, commitHash: string) {
 
 async function getLastCommit(path: string) {
 	const submodule =
-		await exec(`git -C ${path} remote get-url origin | sed -e 's/.*:\/\/github.com\///' -e 's/.*:\/\///' -e 's/\.git$//'
+		await exec(`git -C ${path} remote get-url origin | sed -e 's|.*://github.com/||' -e 's|.*:||' -e 's|\.git$||'
 	`)
 	const author = await exec(`git -C ${path} log -1 --pretty=%an`)
 	const message = await exec(`git -C ${path} log -1 --pretty=format:%s`)

@@ -35946,7 +35946,7 @@ async function getBehindTime(path, commitHash) {
     return timeDiff.humanize();
 }
 async function getLastCommit(path) {
-    const submodule = await (0, bash_1.exec)(`git -C ${path} remote get-url origin | sed -e 's/.*:\/\/github.com\///' -e 's/.*:\/\///' -e 's/\.git$//'
+    const submodule = await (0, bash_1.exec)(`git -C ${path} remote get-url origin | sed -e 's|.*://github.com/||' -e 's|.*:||' -e 's|\.git$||'
 	`);
     const author = await (0, bash_1.exec)(`git -C ${path} log -1 --pretty=%an`);
     const message = await (0, bash_1.exec)(`git -C ${path} log -1 --pretty=format:%s`);
