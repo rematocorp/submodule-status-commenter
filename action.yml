@@ -8,9 +8,6 @@ inputs:
     github-token:
         description: GitHub token, https://docs.github.com/en/actions/reference/authentication-in-a-workflow.
         required: true
-    submodule-path:
-        description: Path to the submodule directory
-        required: true
 runs:
     using: node20
     main: 'dist/index.js'

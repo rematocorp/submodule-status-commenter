@@ -7,29 +7,34 @@ import {
 } from './githubRequests'
 import { exec } from './bash'
 
-export async function run(path: string) {
-	await exec(`git -C ${path} fetch --depth=100 origin main`)
-	await exec(`git -C ${path} fetch --depth=100 origin +refs/heads/*:refs/remotes/origin/*`)
+export async function run() {
+	const paths = await exec("git config --file .gitmodules --get-regexp path | awk '{print $2}'")
 
-	const commitHash = await exec(`git -C ${path} rev-parse HEAD`)
-	const branch = (await exec(`git -C ${path} name-rev --name-only HEAD`)).replace('remotes/origin/', '')
-	const behind = await getBehind(path, commitHash)
-	const ahead = await exec(`git -C ${path} rev-list --count origin/main..HEAD`)
-	const submoduleName = await exec(`basename $(git -C ${path} rev-parse --show-toplevel)`)
-	const lastCommit = await getLastCommit(path)
-	const links = await getLinks(path, commitHash, branch)
+	const messages = await Promise.all(
+		paths.split('\n').map(async (path) => {
+			await exec(`git -C ${path} fetch --depth=100 origin main`)
+			await exec(`git -C ${path} fetch --depth=100 origin +refs/heads/*:refs/remotes/origin/*`)
 
-	await comment(
-		submoduleName,
-		`**Submodule "${submoduleName}" status**
+			const commitHash = await exec(`git -C ${path} rev-parse HEAD`)
+			const branch = (await exec(`git -C ${path} name-rev --name-only HEAD`)).replace('remotes/origin/', '')
+			const behind = await getBehind(path, commitHash)
+			const ahead = await exec(`git -C ${path} rev-list --count origin/main..HEAD`)
+			const submoduleName = await exec(`basename $(git -C ${path} rev-parse --show-toplevel)`)
+			const lastCommit = await getLastCommit(path)
+			const links = await getLinks(path, commitHash, branch)
+
+			return `**Submodule "${submoduleName}" status**
 
 - Current branch: **${branch}**
 - Behind main: **${behind}**
 - Ahead main: **${ahead}**
 - Last commit: *${lastCommit}*
 
-${links}`,
+${links}`
+		}),
 	)
+
+	await comment(messages.join('\n'))
 }
 
 async function getBehind(path: string, commitHash: string) {
@@ -99,9 +104,9 @@ function getLastCommitLink(submoduleUrl: string, commitHash: string) {
 	return `[View last commit](${submoduleUrl}/commit/${commitHash})`
 }
 
-async function comment(submoduleName: string, commentBody: string) {
+async function comment(commentBody: string) {
 	const comments = await getPullRequestComments()
-	const existingComment = comments.find((comment) => comment.body?.includes(`Submodule "${submoduleName}" status`))
+	const existingComment = comments.find((comment) => /Submodule ".*" status/.test(comment.body || ''))
 
 	if (existingComment) {
 		await updatePullRequestComment(existingComment.id, commentBody)

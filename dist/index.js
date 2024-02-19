@@ -35913,24 +35913,28 @@ exports.run = void 0;
 const moment_1 = __importDefault(__nccwpck_require__(9623));
 const githubRequests_1 = __nccwpck_require__(2963);
 const bash_1 = __nccwpck_require__(9134);
-async function run(path) {
-    await (0, bash_1.exec)(`git -C ${path} fetch --depth=100 origin main`);
-    await (0, bash_1.exec)(`git -C ${path} fetch --depth=100 origin +refs/heads/*:refs/remotes/origin/*`);
-    const commitHash = await (0, bash_1.exec)(`git -C ${path} rev-parse HEAD`);
-    const branch = (await (0, bash_1.exec)(`git -C ${path} name-rev --name-only HEAD`)).replace('remotes/origin/', '');
-    const behind = await getBehind(path, commitHash);
-    const ahead = await (0, bash_1.exec)(`git -C ${path} rev-list --count origin/main..HEAD`);
-    const submoduleName = await (0, bash_1.exec)(`basename $(git -C ${path} rev-parse --show-toplevel)`);
-    const lastCommit = await getLastCommit(path);
-    const links = await getLinks(path, commitHash, branch);
-    await comment(submoduleName, `**Submodule "${submoduleName}" status**
+async function run() {
+    const paths = await (0, bash_1.exec)("git config --file .gitmodules --get-regexp path | awk '{print $2}'");
+    const messages = await Promise.all(paths.split('\n').map(async (path) => {
+        await (0, bash_1.exec)(`git -C ${path} fetch --depth=100 origin main`);
+        await (0, bash_1.exec)(`git -C ${path} fetch --depth=100 origin +refs/heads/*:refs/remotes/origin/*`);
+        const commitHash = await (0, bash_1.exec)(`git -C ${path} rev-parse HEAD`);
+        const branch = (await (0, bash_1.exec)(`git -C ${path} name-rev --name-only HEAD`)).replace('remotes/origin/', '');
+        const behind = await getBehind(path, commitHash);
+        const ahead = await (0, bash_1.exec)(`git -C ${path} rev-list --count origin/main..HEAD`);
+        const submoduleName = await (0, bash_1.exec)(`basename $(git -C ${path} rev-parse --show-toplevel)`);
+        const lastCommit = await getLastCommit(path);
+        const links = await getLinks(path, commitHash, branch);
+        return `**Submodule "${submoduleName}" status**
 
 - Current branch: **${branch}**
 - Behind main: **${behind}**
 - Ahead main: **${ahead}**
 - Last commit: *${lastCommit}*
 
-${links}`);
+${links}`;
+    }));
+    await comment(messages.join('\n'));
 }
 exports.run = run;
 async function getBehind(path, commitHash) {
@@ -35981,9 +35985,9 @@ async function getSubmodulePullRequestByBranchName(branchName, submoduleUrl) {
 function getLastCommitLink(submoduleUrl, commitHash) {
     return `[View last commit](${submoduleUrl}/commit/${commitHash})`;
 }
-async function comment(submoduleName, commentBody) {
+async function comment(commentBody) {
     const comments = await (0, githubRequests_1.getPullRequestComments)();
-    const existingComment = comments.find((comment) => comment.body?.includes(`Submodule "${submoduleName}" status`));
+    const existingComment = comments.find((comment) => /Submodule ".*" status/.test(comment.body || ''));
     if (existingComment) {
         await (0, githubRequests_1.updatePullRequestComment)(existingComment.id, commentBody);
     }
@@ -37911,9 +37915,8 @@ var __webpack_exports__ = {};
 var exports = __webpack_exports__;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core_1 = __nccwpck_require__(2186);
 const main_1 = __nccwpck_require__(399);
-(0, main_1.run)((0, core_1.getInput)('submodule-path', { required: true }));
+(0, main_1.run)();
 
 })();
 
