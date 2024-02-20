@@ -29,5 +29,5 @@ jobs:
 
             - uses: rematocorp/submodule-status-commenter@v2
               with:
-                  github-token: ${{ secrets.GITHUB_TOKEN }} # Make sure this token can access your submodules
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
 ```
