@@ -35939,7 +35939,7 @@ ${links}`;
 exports.run = run;
 async function getBranchName(path) {
     const branchName = await (0, bash_1.exec)(`git -C ${path} name-rev --name-only HEAD`);
-    return branchName.replace('remotes/origin/', '').replace(/~.*$/, '');
+    return branchName.replace('remotes/origin/', '').replace(/(~|\^).*$/, '');
 }
 async function getBehind(path, commitHash) {
     const behind = await (0, bash_1.exec)(`git -C ${path} rev-list --count HEAD..origin/main`);

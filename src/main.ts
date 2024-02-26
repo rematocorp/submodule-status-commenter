@@ -40,7 +40,7 @@ ${links}`
 async function getBranchName(path: string) {
 	const branchName = await exec(`git -C ${path} name-rev --name-only HEAD`)
 
-	return branchName.replace('remotes/origin/', '').replace(/~.*$/, '')
+	return branchName.replace('remotes/origin/', '').replace(/(~|\^).*$/, '')
 }
 
 async function getBehind(path: string, commitHash: string) {
