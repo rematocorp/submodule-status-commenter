@@ -16,7 +16,7 @@ export async function run() {
 			await exec(`git -C ${path} fetch --depth=100 origin +refs/heads/*:refs/remotes/origin/*`)
 
 			const commitHash = await exec(`git -C ${path} rev-parse HEAD`)
-			const branch = (await exec(`git -C ${path} name-rev --name-only HEAD`)).replace('remotes/origin/', '')
+			const branch = await getBranchName(path)
 			const behind = await getBehind(path, commitHash)
 			const ahead = await exec(`git -C ${path} rev-list --count origin/main..HEAD`)
 			const submoduleName = await exec(`basename $(git -C ${path} rev-parse --show-toplevel)`)
@@ -35,6 +35,12 @@ ${links}`
 	)
 
 	await comment(messages.join('\n'))
+}
+
+async function getBranchName(path: string) {
+	const branchName = await exec(`git -C ${path} name-rev --name-only HEAD`)
+
+	return branchName.replace('remotes/origin/', '').replace(/~.*$/, '')
 }
 
 async function getBehind(path: string, commitHash: string) {

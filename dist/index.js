@@ -35919,7 +35919,7 @@ async function run() {
         await (0, bash_1.exec)(`git -C ${path} fetch --depth=100 origin main`);
         await (0, bash_1.exec)(`git -C ${path} fetch --depth=100 origin +refs/heads/*:refs/remotes/origin/*`);
         const commitHash = await (0, bash_1.exec)(`git -C ${path} rev-parse HEAD`);
-        const branch = (await (0, bash_1.exec)(`git -C ${path} name-rev --name-only HEAD`)).replace('remotes/origin/', '');
+        const branch = await getBranchName(path);
         const behind = await getBehind(path, commitHash);
         const ahead = await (0, bash_1.exec)(`git -C ${path} rev-list --count origin/main..HEAD`);
         const submoduleName = await (0, bash_1.exec)(`basename $(git -C ${path} rev-parse --show-toplevel)`);
@@ -35937,6 +35937,10 @@ ${links}`;
     await comment(messages.join('\n'));
 }
 exports.run = run;
+async function getBranchName(path) {
+    const branchName = await (0, bash_1.exec)(`git -C ${path} name-rev --name-only HEAD`);
+    return branchName.replace('remotes/origin/', '').replace(/~.*$/, '');
+}
 async function getBehind(path, commitHash) {
     const behind = await (0, bash_1.exec)(`git -C ${path} rev-list --count HEAD..origin/main`);
     const behindTime = Number(behind) ? await getBehindTime(path, commitHash) : '';
