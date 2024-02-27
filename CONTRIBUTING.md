@@ -1,3 +1,3 @@
 -   Make your changes in `src/*` and not in `dist/index.js`
--   Make sure your changes are [prettified](https://prettier.io/) (you can use `yarn prettier`)
--   Run `yarn build` with Node v20 before committing your changes
+-   Make sure your changes are [prettified](https://prettier.io/) (you can use `npm run prettier`)
+-   Run `npm run build` with Node v20 before committing your changes
