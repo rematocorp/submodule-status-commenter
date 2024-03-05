@@ -38,9 +38,26 @@ ${links}`
 }
 
 async function getBranchName(path: string) {
-	const branchName = await exec(`git -C ${path} name-rev --name-only HEAD`)
+	// Try to determine the current branch name in a way that accounts for detached HEADs and other non-standard situations
+	let branchName = await exec(`git -C ${path} rev-parse --abbrev-ref HEAD`)
 
-	return branchName.replace('remotes/origin/', '').replace(/(~|\^).*$/, '')
+	// If HEAD is detached, `rev-parse` returns "HEAD", so try a different strategy
+	if (branchName.trim() === 'HEAD') {
+		// This command attempts to find the most recent branch that the current commit is on
+		branchName = await exec(`git -C ${path} branch --contains HEAD --sort=-committerdate | head -n 1`)
+	}
+
+	// If still not found or in a detached state without a clear branch, use 'git name-rev' as a fallback
+	if (!branchName || branchName.trim() === 'HEAD') {
+		branchName = await exec(`git -C ${path} name-rev --name-only HEAD`)
+	}
+
+	// For a clean branch name, especially when in detached HEAD state
+	// This removes any additional annotations added by 'git name-rev'
+	return branchName
+		.replace('remotes/origin/', '')
+		.replace(/[\^~].*/, '')
+		.trim()
 }
 
 async function getBehind(path: string, commitHash: string) {
