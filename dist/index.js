@@ -35938,19 +35938,21 @@ ${links}`;
 }
 exports.run = run;
 async function getBranchName(path) {
-    // Try to determine the current branch name in a way that accounts for detached HEADs and other non-standard situations
-    let branchName = await (0, bash_1.exec)(`git -C ${path} rev-parse --abbrev-ref HEAD`);
-    // If HEAD is detached, `rev-parse` returns "HEAD", so try a different strategy
-    if (branchName.trim() === 'HEAD') {
-        // This command attempts to find the most recent branch that the current commit is on
-        branchName = await (0, bash_1.exec)(`git -C ${path} branch --contains HEAD --sort=-committerdate | head -n 1`);
+    let branchName = await (0, bash_1.exec)(`git -C ${path} branch --contains HEAD --all --no-color`);
+    // Filter out remote branches and HEAD entry, prioritize local branches
+    const branches = branchName
+        .split('\n')
+        .map((line) => line.trim())
+        .filter((line) => line.length && !line.startsWith('remotes/') && !line.includes('* (HEAD detached at'))
+        .map((line) => line.replace(/^\* /, ''));
+    if (branches.length > 0) {
+        // Return the first local branch name if available
+        branchName = branches[0];
     }
-    // If still not found or in a detached state without a clear branch, use 'git name-rev' as a fallback
-    if (!branchName || branchName.trim() === 'HEAD') {
+    else {
+        // Fallback to a more descriptive state if no local branch is found
         branchName = await (0, bash_1.exec)(`git -C ${path} name-rev --name-only HEAD`);
     }
-    // For a clean branch name, especially when in detached HEAD state
-    // This removes any additional annotations added by 'git name-rev'
     return branchName
         .replace('remotes/origin/', '')
         .replace(/[\^~].*/, '')
