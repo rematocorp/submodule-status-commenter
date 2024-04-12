@@ -35931,14 +35931,14 @@ async function getBulletPoints(path) {
     const branch = await getBranchName(path);
     const behind = await getBehind(path, commitHash);
     const ahead = await (0, bash_1.exec)(`git -C ${path} rev-list --count origin/main..HEAD`);
-    const pullRequest = await getPullRequest(branch, submoduleUrl);
+    const pr = await getPullRequest(branch, submoduleUrl);
     const lastCommit = await getLastCommit(path, submoduleUrl, commitHash);
     return [
-        `- Current branch: **${branch} [🔗](${submoduleUrl}/tree/${commitHash})**`,
+        `- [Current branch](${submoduleUrl}/tree/${commitHash}): **${branch}**`,
         `- Behind main: **${behind}**`,
         `- Ahead main: **${ahead}**`,
-        pullRequest && `- Open PR: **${pullRequest}**`,
-        `- Last commit: ${lastCommit}`,
+        pr && `- [Pull request](${pr.html_url}): **${pr.title}**`,
+        `- [Last commit](${submoduleUrl}/commit/${commitHash}): *${lastCommit}*`,
     ]
         .filter((p) => p)
         .join('\n');
@@ -35978,8 +35978,7 @@ async function getBehindTime(path, commitHash) {
     return timeDiff.humanize();
 }
 async function getPullRequest(branch, submoduleUrl) {
-    const pr = await getSubmodulePullRequestByBranchName(branch, submoduleUrl);
-    return pr ? `${pr.title} [🔗](${pr.html_url})` : '';
+    return getSubmodulePullRequestByBranchName(branch, submoduleUrl);
 }
 async function getSubmodulePullRequestByBranchName(branchName, submoduleUrl) {
     const match = submoduleUrl.match(/https:\/\/[^\/]+\/([^\/]+)\/([^\.]+)/) || [];
@@ -35991,14 +35990,13 @@ async function getSubmodulePullRequestByBranchName(branchName, submoduleUrl) {
 async function getLastCommit(path, submoduleUrl, commitHash) {
     const submodule = await (0, bash_1.exec)(`git -C ${path} remote get-url origin | sed -e 's|.*://github.com/||' -e 's|.*:||' -e 's|\.git$||'
 	`);
-    const url = `${submoduleUrl}/commit/${commitHash}`;
     const author = await (0, bash_1.exec)(`git -C ${path} log -1 --pretty=%an`);
     const message = await (0, bash_1.exec)(`git -C ${path} log -1 --pretty=format:%s`);
     const formattedMessage = message
         .trim()
         .substring(0, 50)
         .replace('Merge pull request #', `Merge pull request ${submodule}#`);
-    return `*"${formattedMessage.trim().substring(0, submodule.length + 50)}" by ${author.trim()}* [🔗](${url})`;
+    return `"${formattedMessage.trim().substring(0, submodule.length + 50)}" by ${author.trim()}`;
 }
 async function comment(commentBody) {
     const comments = await (0, githubRequests_1.getPullRequestComments)();
