@@ -29,14 +29,13 @@ async function getBulletPoints(path: string) {
 	const commitHash = await exec(`git -C ${path} rev-parse HEAD`)
 	const submoduleUrl = (await exec(`git -C ${path} config --get remote.origin.url`)).replace('.git', '')
 	const branch = await getBranchName(path)
-	const exactStateLink = getExactStateLink(submoduleUrl, commitHash)
 	const behind = await getBehind(path, commitHash)
 	const ahead = await exec(`git -C ${path} rev-list --count origin/main..HEAD`)
 	const pullRequest = await getPullRequest(branch, submoduleUrl)
 	const lastCommit = await getLastCommit(path, submoduleUrl, commitHash)
 
 	return [
-		`- Current branch: **[${branch}](${exactStateLink})**`,
+		`- Current branch: **[${branch}](${submoduleUrl}/tree/${commitHash})**`,
 		`- Behind main: **${behind}**`,
 		`- Ahead main: **${ahead}**`,
 		pullRequest && `- Open PR: **${pullRequest}**`,
@@ -70,10 +69,6 @@ async function getBranchName(path: string) {
 		.trim()
 }
 
-function getExactStateLink(submoduleUrl: string, commitHash: string) {
-	return `[View exact state](${submoduleUrl}/tree/${commitHash})`
-}
-
 async function getBehind(path: string, commitHash: string) {
 	const behind = await exec(`git -C ${path} rev-list --count HEAD..origin/main`)
 	const behindTime = Number(behind) ? await getBehindTime(path, commitHash) : ''
@@ -93,21 +88,6 @@ async function getBehindTime(path: string, commitHash: string) {
 	return timeDiff.humanize()
 }
 
-async function getLastCommit(path: string, submoduleUrl: string, commitHash: string) {
-	const submodule =
-		await exec(`git -C ${path} remote get-url origin | sed -e 's|.*://github.com/||' -e 's|.*:||' -e 's|\.git$||'
-	`)
-	const url = `[View last commit](${submoduleUrl}/commit/${commitHash})`
-	const author = await exec(`git -C ${path} log -1 --pretty=%an`)
-	const message = await exec(`git -C ${path} log -1 --pretty=format:%s`)
-	const formattedMessage = message
-		.trim()
-		.substring(0, 50)
-		.replace('Merge pull request #', `Merge pull request ${submodule}#`)
-
-	return `["${formattedMessage.trim().substring(0, submodule.length + 50)}" by ${author.trim()}](${url})`
-}
-
 async function getPullRequest(branch: string, submoduleUrl: string) {
 	const pr = await getSubmodulePullRequestByBranchName(branch, submoduleUrl)
 
@@ -122,6 +102,21 @@ async function getSubmodulePullRequestByBranchName(branchName: string, submodule
 	const pullRequests = await getPullRequestsByBranchName(owner, repo, branchName)
 
 	return pullRequests.length ? pullRequests[0] : null
+}
+
+async function getLastCommit(path: string, submoduleUrl: string, commitHash: string) {
+	const submodule =
+		await exec(`git -C ${path} remote get-url origin | sed -e 's|.*://github.com/||' -e 's|.*:||' -e 's|\.git$||'
+	`)
+	const url = `${submoduleUrl}/commit/${commitHash}`
+	const author = await exec(`git -C ${path} log -1 --pretty=%an`)
+	const message = await exec(`git -C ${path} log -1 --pretty=format:%s`)
+	const formattedMessage = message
+		.trim()
+		.substring(0, 50)
+		.replace('Merge pull request #', `Merge pull request ${submodule}#`)
+
+	return `["${formattedMessage.trim().substring(0, submodule.length + 50)}" by ${author.trim()}](${url})`
 }
 
 async function comment(commentBody: string) {
