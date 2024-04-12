@@ -102,7 +102,7 @@ async function getSubmodulePullRequestByBranchName(branchName: string, submodule
 	return pullRequests.length ? pullRequests[0] : null
 }
 
-async function getLastCommit(path: string, submoduleUrl: string, commitHash: string) {
+async function getLastCommit(path: string) {
 	const submodule =
 		await exec(`git -C ${path} remote get-url origin | sed -e 's|.*://github.com/||' -e 's|.*:||' -e 's|\.git$||'
 	`)
