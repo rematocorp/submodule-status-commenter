@@ -35,7 +35,7 @@ async function getBulletPoints(path: string) {
 	const lastCommit = await getLastCommit(path, submoduleUrl, commitHash)
 
 	return [
-		`- Current branch: **[${branch}](${submoduleUrl}/tree/${commitHash})**`,
+		`- Current branch: **${branch} [🌎](${submoduleUrl}/tree/${commitHash})**`,
 		`- Behind main: **${behind}**`,
 		`- Ahead main: **${ahead}**`,
 		pullRequest && `- Open PR: **${pullRequest}**`,
@@ -91,7 +91,7 @@ async function getBehindTime(path: string, commitHash: string) {
 async function getPullRequest(branch: string, submoduleUrl: string) {
 	const pr = await getSubmodulePullRequestByBranchName(branch, submoduleUrl)
 
-	return pr ? `[${pr.title}](${pr.html_url})` : ''
+	return pr ? `${pr.title} [🌎](${pr.html_url})` : ''
 }
 
 async function getSubmodulePullRequestByBranchName(branchName: string, submoduleUrl: string) {
@@ -116,7 +116,7 @@ async function getLastCommit(path: string, submoduleUrl: string, commitHash: str
 		.substring(0, 50)
 		.replace('Merge pull request #', `Merge pull request ${submodule}#`)
 
-	return `"${formattedMessage.trim().substring(0, submodule.length + 50)}" by ${author.trim()} [🔗](${url})`
+	return `"${formattedMessage.trim().substring(0, submodule.length + 50)}" by ${author.trim()} [🌎](${url})`
 }
 
 async function comment(commentBody: string) {
