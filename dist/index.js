@@ -35923,14 +35923,14 @@ async function run() {
         const behind = await getBehind(path, commitHash);
         const ahead = await (0, bash_1.exec)(`git -C ${path} rev-list --count origin/main..HEAD`);
         const submoduleName = await (0, bash_1.exec)(`basename $(git -C ${path} rev-parse --show-toplevel)`);
+        const submoduleUrl = (await (0, bash_1.exec)(`git -C ${path} config --get remote.origin.url`)).replace('.git', '');
         const lastCommit = await getLastCommit(path);
-        const links = await getLinks(path, commitHash, branch);
+        const pullRequestTitle = await getPullRequestTitle(branch, submoduleUrl);
+        const bulletPoints = getBulletPoints(branch, behind, ahead, lastCommit, pullRequestTitle);
+        const links = await getLinks(commitHash, branch, submoduleUrl);
         return `**Submodule "${submoduleName}" status**
 
-- Current branch: **${branch}**
-- Behind main: **${behind}**
-- Ahead main: **${ahead}**
-- Last commit: *${lastCommit}*
+${bulletPoints}
 
 ${links}`;
     }));
@@ -35982,12 +35982,26 @@ async function getLastCommit(path) {
         .replace('Merge pull request #', `Merge pull request ${submodule}#`);
     return `"${formattedMessage.trim().substring(0, submodule.length + 50)}" by ${author.trim()}`;
 }
-async function getLinks(path, commitHash, branch) {
-    const submoduleUrl = (await (0, bash_1.exec)(`git -C ${path} config --get remote.origin.url`)).replace('.git', '');
-    const exactStateLink = getExactStateLink(submoduleUrl, commitHash);
+async function getPullRequestTitle(branch, submoduleUrl) {
+    const pr = await getSubmodulePullRequestByBranchName(branch, submoduleUrl);
+    return pr?.title;
+}
+function getBulletPoints(branch, behind, ahead, lastCommit, pullRequestTitle) {
+    return [
+        `- Current branch: **${branch}**`,
+        `- Behind main: **${behind}**`,
+        `- Ahead main: **${ahead}**`,
+        pullRequestTitle && `- Open PR: **${pullRequestTitle}**`,
+        `- Last commit: *${lastCommit}*`,
+    ]
+        .filter((p) => p)
+        .join('\n');
+}
+async function getLinks(commitHash, branch, submoduleUrl) {
     const prLink = await getSubmodulePullRequestLink(branch, submoduleUrl);
+    const exactStateLink = getExactStateLink(submoduleUrl, commitHash);
     const lastCommitLink = getLastCommitLink(submoduleUrl, commitHash);
-    return [exactStateLink, prLink, lastCommitLink].filter((link) => link).join(' — ');
+    return [prLink, exactStateLink, lastCommitLink].filter((link) => link).join(' — ');
 }
 function getExactStateLink(submoduleUrl, commitHash) {
     return `[View exact state](${submoduleUrl}/tree/${commitHash})`;

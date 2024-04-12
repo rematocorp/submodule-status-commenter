@@ -8,7 +8,7 @@ import {
 import { exec } from './bash'
 
 export async function run() {
-	const paths = await exec("git config --file .gitmodules --get-regexp path | awk '{print $2}'")
+	const paths: string = await exec("git config --file .gitmodules --get-regexp path | awk '{print $2}'")
 
 	const messages = await Promise.all(
 		paths.split('\n').map(async (path) => {
@@ -20,15 +20,15 @@ export async function run() {
 			const behind = await getBehind(path, commitHash)
 			const ahead = await exec(`git -C ${path} rev-list --count origin/main..HEAD`)
 			const submoduleName = await exec(`basename $(git -C ${path} rev-parse --show-toplevel)`)
+			const submoduleUrl = (await exec(`git -C ${path} config --get remote.origin.url`)).replace('.git', '')
 			const lastCommit = await getLastCommit(path)
-			const links = await getLinks(path, commitHash, branch)
+			const pullRequestTitle = await getPullRequestTitle(branch, submoduleUrl)
+			const bulletPoints = getBulletPoints(branch, behind, ahead, lastCommit, pullRequestTitle)
+			const links = await getLinks(commitHash, branch, submoduleUrl)
 
 			return `**Submodule "${submoduleName}" status**
 
-- Current branch: **${branch}**
-- Behind main: **${behind}**
-- Ahead main: **${ahead}**
-- Last commit: *${lastCommit}*
+${bulletPoints}
 
 ${links}`
 		}),
@@ -38,7 +38,7 @@ ${links}`
 }
 
 async function getBranchName(path: string) {
-	let branchName = await exec(`git -C ${path} branch --contains HEAD --all --no-color`)
+	let branchName: string = await exec(`git -C ${path} branch --contains HEAD --all --no-color`)
 
 	// Filter out remote branches and HEAD entry, prioritize local branches
 	const branches = branchName
@@ -94,14 +94,30 @@ async function getLastCommit(path: string) {
 	return `"${formattedMessage.trim().substring(0, submodule.length + 50)}" by ${author.trim()}`
 }
 
-async function getLinks(path: string, commitHash: string, branch: string) {
-	const submoduleUrl = (await exec(`git -C ${path} config --get remote.origin.url`)).replace('.git', '')
+async function getPullRequestTitle(branch: string, submoduleUrl: string) {
+	const pr = await getSubmodulePullRequestByBranchName(branch, submoduleUrl)
 
-	const exactStateLink = getExactStateLink(submoduleUrl, commitHash)
+	return pr?.title
+}
+
+function getBulletPoints(branch: string, behind: string, ahead: string, lastCommit: string, pullRequestTitle?: string) {
+	return [
+		`- Current branch: **${branch}**`,
+		`- Behind main: **${behind}**`,
+		`- Ahead main: **${ahead}**`,
+		pullRequestTitle && `- Open PR: **${pullRequestTitle}**`,
+		`- Last commit: *${lastCommit}*`,
+	]
+		.filter((p) => p)
+		.join('\n')
+}
+
+async function getLinks(commitHash: string, branch: string, submoduleUrl: string) {
 	const prLink = await getSubmodulePullRequestLink(branch, submoduleUrl)
+	const exactStateLink = getExactStateLink(submoduleUrl, commitHash)
 	const lastCommitLink = getLastCommitLink(submoduleUrl, commitHash)
 
-	return [exactStateLink, prLink, lastCommitLink].filter((link) => link).join(' — ')
+	return [prLink, exactStateLink, lastCommitLink].filter((link) => link).join(' — ')
 }
 
 function getExactStateLink(submoduleUrl: string, commitHash: string) {
