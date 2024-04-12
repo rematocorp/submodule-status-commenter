@@ -8,7 +8,7 @@ This action informs reviewers about the submodule status in the PR:
 > -   Behind main: **2 (4 days)**
 > -   Ahead main: **1**
 > -   Open PR: **[Introduce new buttons](#)**
-> -   Last commit: _["Merge pull request foo#182" by John Doe](#)_
+> -   Last commit: _"Merge pull request foo#182" by John Doe [🔗](#)_
 
 ## Configuration
 
