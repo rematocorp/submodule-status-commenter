@@ -35998,7 +35998,7 @@ async function getLastCommit(path, submoduleUrl, commitHash) {
         .trim()
         .substring(0, 50)
         .replace('Merge pull request #', `Merge pull request ${submodule}#`);
-    return `"${formattedMessage.trim().substring(0, submodule.length + 50)}" by ${author.trim()} [— Open](${url})`;
+    return `"${formattedMessage.trim().substring(0, submodule.length + 50)}" by ${author.trim()} — [View](${url})`;
 }
 async function comment(commentBody) {
     const comments = await (0, githubRequests_1.getPullRequestComments)();
