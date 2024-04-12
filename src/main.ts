@@ -32,7 +32,7 @@ async function getBulletPoints(path: string) {
 	const behind = await getBehind(path, commitHash)
 	const ahead = await exec(`git -C ${path} rev-list --count origin/main..HEAD`)
 	const pr = await getPullRequest(branch, submoduleUrl)
-	const lastCommit = await getLastCommit(path, submoduleUrl, commitHash)
+	const lastCommit = await getLastCommit(path)
 
 	return [
 		`- [Current branch](${submoduleUrl}/tree/${commitHash}): **${branch}**`,

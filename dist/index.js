@@ -35932,7 +35932,7 @@ async function getBulletPoints(path) {
     const behind = await getBehind(path, commitHash);
     const ahead = await (0, bash_1.exec)(`git -C ${path} rev-list --count origin/main..HEAD`);
     const pr = await getPullRequest(branch, submoduleUrl);
-    const lastCommit = await getLastCommit(path, submoduleUrl, commitHash);
+    const lastCommit = await getLastCommit(path);
     return [
         `- [Current branch](${submoduleUrl}/tree/${commitHash}): **${branch}**`,
         `- Behind main: **${behind}**`,
@@ -35987,7 +35987,7 @@ async function getSubmodulePullRequestByBranchName(branchName, submoduleUrl) {
     const pullRequests = await (0, githubRequests_1.getPullRequestsByBranchName)(owner, repo, branchName);
     return pullRequests.length ? pullRequests[0] : null;
 }
-async function getLastCommit(path, submoduleUrl, commitHash) {
+async function getLastCommit(path) {
     const submodule = await (0, bash_1.exec)(`git -C ${path} remote get-url origin | sed -e 's|.*://github.com/||' -e 's|.*:||' -e 's|\.git$||'
 	`);
     const author = await (0, bash_1.exec)(`git -C ${path} log -1 --pretty=%an`);
