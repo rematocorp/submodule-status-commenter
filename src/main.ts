@@ -116,7 +116,7 @@ async function getLastCommit(path: string, submoduleUrl: string, commitHash: str
 		.substring(0, 50)
 		.replace('Merge pull request #', `Merge pull request ${submodule}#`)
 
-	return `[🔗](${url}) "${formattedMessage.trim().substring(0, submodule.length + 50)}" by ${author.trim()}`
+	return `"${formattedMessage.trim().substring(0, submodule.length + 50)}" by ${author.trim()} [🔗](${url})`
 }
 
 async function comment(commentBody: string) {
