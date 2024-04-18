@@ -4,11 +4,11 @@ This action informs reviewers about the submodule status in the PR:
 
 > **Submodule "foo" status**
 >
-> -   [Current branch](#): **feature/bar**
-> -   Behind main: **2 (4 days)**
-> -   Ahead main: **1**
-> -   [Pull request](#): **Introduce new buttons**
-> -   [Last commit](#): _"Merge pull request foo#182" by John Doe_
+> -   **[Current branch](#)**: feature/bar
+> -   **Behind main**: 2 (4 days)
+> -   **Ahead main**: 1
+> -   **[Pull request](#)**: Introduce new buttons
+> -   **[Last commit](#)**: _"Merge pull request foo#182" by John Doe_
 
 ## Configuration
 
