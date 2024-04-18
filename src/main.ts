@@ -35,11 +35,11 @@ async function getBulletPoints(path: string) {
 	const lastCommit = await getLastCommit(path)
 
 	return [
-		`- [Current branch](${submoduleUrl}/tree/${commitHash}): **${branch}**`,
-		`- Behind main: **${behind}**`,
-		`- Ahead main: **${ahead}**`,
-		pr && `- [Pull request](${pr.html_url}): **${pr.title}**`,
-		`- [Last commit](${submoduleUrl}/commit/${commitHash}): *${lastCommit}*`,
+		`- **[Current branch](${submoduleUrl}/tree/${commitHash})**: ${branch}`,
+		`- **Behind main**: ${behind}`,
+		`- **Ahead main**: ${ahead}`,
+		pr && `- **[Pull request](${pr.html_url})**: ${pr.title}`,
+		`- **[Last commit](${submoduleUrl}/commit/${commitHash})**: *${lastCommit}*`,
 	]
 		.filter((p) => p)
 		.join('\n')
