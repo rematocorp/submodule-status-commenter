@@ -1,11 +1,12 @@
 import moment from 'moment'
+
+import { exec } from './bash'
 import {
 	createPullRequestComment,
 	getPullRequestComments,
 	getPullRequestsByBranchName,
 	updatePullRequestComment,
 } from './githubRequests'
-import { exec } from './bash'
 
 export async function run() {
 	const paths: string = await exec("git config --file .gitmodules --get-regexp path | awk '{print $2}'")

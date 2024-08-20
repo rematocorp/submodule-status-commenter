@@ -1,5 +1,5 @@
 import { getInput } from '@actions/core'
-import { getOctokit, context } from '@actions/github'
+import { context, getOctokit } from '@actions/github'
 
 const githubToken = getInput('github-token', { required: true })
 const octokit = getOctokit(githubToken)
