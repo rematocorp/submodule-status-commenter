@@ -17,7 +17,7 @@
 		"@actions/exec": "^2.0.0",
 		"@actions/github": "^7.0.0",
 		"@octokit/rest": "^22.0.1",
-		"axios": "^1.13.2",
+		"axios": "^1.13.3",
 		"moment": "^2.30.1"
 	},
 	"devDependencies": {
