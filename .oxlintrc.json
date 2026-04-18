@@ -1,0 +1,20 @@
+{
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	"categories": {
+		"correctness": "off"
+	},
+	"ignorePatterns": ["dist"],
+	"rules": {
+		"no-undef": "off",
+		"no-unused-vars": ["error", { "ignoreRestSiblings": true }],
+		"no-var": "error",
+		"no-const-assign": "error",
+		"prefer-const": ["error", { "destructuring": "all" }],
+		"curly": "error",
+		"object-shorthand": "error",
+		"eqeqeq": ["error", "always", { "null": "ignore" }],
+		"no-unreachable": "error",
+		"no-fallthrough": "error",
+		"sort-imports": ["error", { "ignoreCase": true, "ignoreDeclarationSort": true }]
+	}
+}

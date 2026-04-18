@@ -1,32 +1,32 @@
 {
 	"name": "@remato/submodule-status-commenter",
-	"version": "2.1.1",
+	"version": "3.0.0",
 	"license": "MIT",
 	"description": "GitHub action to comment submodules current branch and state to the PR",
 	"main": "dist/index.js",
 	"engines": {
-		"node": ">=20.0.0"
+		"node": ">=24.0.0"
 	},
 	"scripts": {
-		"build": "ncc build src/index.ts",
+		"build": "esbuild src/index.ts --bundle --platform=node --target=node24 --outfile=dist/index.js",
 		"prettier": "prettier --list-different \"**/*.ts\"",
-		"lint": "eslint \"**/*.ts\""
+		"lint": "oxlint",
+		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@actions/core": "^2.0.2",
-		"@actions/exec": "^2.0.0",
-		"@actions/github": "^7.0.0",
+		"@actions/core": "^3.0.0",
+		"@actions/exec": "^3.0.0",
+		"@actions/github": "^9.1.0",
 		"@octokit/rest": "^22.0.1",
-		"axios": "^1.14.0",
+		"axios": "^1.15.0",
 		"moment": "^2.30.1"
 	},
 	"devDependencies": {
-		"@remato/eslint-config": "^2.1.1",
 		"@remato/prettier-config": "^1.1.0",
-		"@vercel/ncc": "^0.38.3",
-		"eslint": "^9.39.2",
-		"prettier": "^3.8.1",
-		"typescript": "^5.9.3"
+		"esbuild": "^0.28.0",
+		"oxlint": "^1.60.0",
+		"prettier": "^3.8.3",
+		"typescript": "^6.0.3"
 	},
 	"prettier": "@remato/prettier-config"
 }
