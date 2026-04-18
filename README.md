@@ -26,7 +26,7 @@ jobs:
                   token: ${{ secrets.GITHUB_TOKEN }}
                   submodules: true
 
-            - uses: rematocorp/submodule-status-commenter@v2
+            - uses: rematocorp/submodule-status-commenter@v3
               with:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
 ```
